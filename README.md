@@ -1,0 +1,2 @@
+# xworkspace
+A workspace template
