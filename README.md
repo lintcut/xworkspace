@@ -142,7 +142,7 @@ Set System Variable "`XWSROOT=<path/to/XWORKSPACE>`"
 
 **Other Platform**
 
-See section ["3. Global Variables"](/workspace.settings/docs/BASH.md##31-xwsroot)
+See section ["3. Global Variables"](/workspace.settings/docs/BASH.md#31-xwsroot)
 
 # 3. Workspace
 
@@ -158,11 +158,13 @@ See section ["3. Global Variables"](/workspace.settings/docs/BASH.md##31-xwsroot
 
 ## 3.3 Cleanup
 
-# 4. 3rd-Party
+# 4. Third-Party
 
-## 4.1 Init
+## 4.1 Boost
 
-## 4.2 Update
+## 4.2 OpenSSL
+
+## 4.3 Zlib
 
 # 5. Development
 
