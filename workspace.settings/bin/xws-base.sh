@@ -39,3 +39,9 @@ xwsGetProgramFiles86(){
         echo "/c/Program Files"
     fi
 }
+
+xwsAbort(){
+    echo
+    echo "Aborted: $@"
+    exit 1
+}
