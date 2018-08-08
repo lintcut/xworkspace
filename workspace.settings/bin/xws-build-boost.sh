@@ -144,5 +144,6 @@ if [ ! -d "../../../external/boost/$TARGET_BOOST_VERSION2/libs/debug_x86" ]; the
 fi
 cp build.msvc/debug_32/staged/lib/*.* ../../../external/boost/$TARGET_BOOST_VERSION2/libs/debug_x86/
 
+cd $CURDIR
 echo ""
 echo "Boost Build Seccessfully"

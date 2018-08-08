@@ -56,4 +56,4 @@ REM    address-model=32/64          // 32Bits/64Bits
 REM    link=static/shared           // Static library or DLL
 REM    runtime-link=static/shared   // Link to static/dynamic runtime libs
 REM    threading=multi              // Multi-threads
-b2 -j8 --build-dir=build.msvc/%CONFIGURATION%_%PLATFORM% --stagedir=build.msvc/%CONFIGURATION%_%PLATFORM%/staged --build-type=complete --toolset=msvc --layout=tagged variant=%CONFIGURATION% address-model=%PLATFORM%  link=%LINKTYPE% runtime-link=%LINKTYPE% threading=multi stage >> build.msvc/build-%CONFIGURATION%-%PLATFORM%-%LINKTYPE%.log
+b2 -j8 --build-dir=build.msvc/%CONFIGURATION%_%PLATFORM% --stagedir=build.msvc/%CONFIGURATION%_%PLATFORM%/staged --build-type=complete --toolset=msvc --layout=tagged variant=%CONFIGURATION% address-model=%PLATFORM% link=%LINKTYPE% runtime-link=%LINKTYPE% threading=multi stage >> build.msvc/build-%CONFIGURATION%-%PLATFORM%-%LINKTYPE%.log

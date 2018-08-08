@@ -7,6 +7,11 @@ xwsGetPythonVersion(){
     echo `python -c "import sys;t='{v[0]}.{v[1]}.{v[2]}'.format(v=list(sys.version_info[:3]));sys.stdout.write(t)"`
 }
 
+# get Perl version
+xwsGetPerlVersion(){
+    echo `perl -v | grep subversion | grep -Po '\(v\K[^)]*'`
+}
+
 # get GO version
 xwsGetGoVersion(){
     echo `go version | sed "s/go version //" | sed "s/ .*//" | sed "s/go//"`

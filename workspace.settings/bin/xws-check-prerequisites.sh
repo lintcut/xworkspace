@@ -25,6 +25,15 @@ else
     echo "  Python:         $VerPython"
 fi
 
+# Check perl
+VerPerl=`xwsGetPerlVersion`
+if [ "$VerPerl" == "" ]; then
+    echo "  Perl:           (Error: Python is not found)"
+    exit 1
+else
+    echo "  Perl:           $VerPerl"
+fi
+
 # Check GO
 VerGO=`xwsGetGoVersion`
 if [ "$VerGO" == "" ]; then
