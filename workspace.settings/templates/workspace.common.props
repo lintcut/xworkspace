@@ -7,9 +7,9 @@
   <PropertyGroup>
     <_PropertySheetDisplayName>XWorkspace Common Properties</_PropertySheetDisplayName>
     <WorkspaceDir>$(XWORKSPACEDIR)\</WorkspaceDir>
-    <WorkspaceOutRoot>$(XWORKSPACEDIR)\output\</WorkspaceOutDir>
-    <CommonOutRoot>$(SolutionDir)output\</RobloxClientDir>
-    <CommonIntRoot>$(SolutionDir)output\intermediate\$(ProjectName)\</RobloxClientDir>
+    <WorkspaceOutRoot>$(XWORKSPACEDIR)\output\</WorkspaceOutRoot>
+    <CommonOutRoot>$(SolutionDir)output\</CommonOutRoot>
+    <CommonIntRoot>$(SolutionDir)output\intermediate\$(ProjectName)\</CommonIntRoot>
     <CommonOutDirName>win_$(Platform.ToLower().Replace("win32", "x86"))_$(Configuration.ToLower())</CommonOutDirName>
     <CommonOutDirName Condition="'$(ApplicationType)' == 'Windows Store'">winuwp_$(Platform.ToLower().Replace("win32", "x86"))_$(Configuration.ToLower())</CommonOutDirName>
     <WorkspaceOutDir>$(WorkspaceOutRoot)$(SolutionName)\$(CommonOutDirName)\</WorkspaceOutDir>
