@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Configuration">
+    <UseDebugLibraries Condition="'$(Configuration)' != 'Debug'">false</UseDebugLibraries>
+    <UseDebugLibraries Condition="'$(Configuration)' == 'Debug'">true</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup>
+    <_PropertySheetDisplayName>XWorkspace Common Properties</_PropertySheetDisplayName>
+    <WorkspaceDir>$(XWORKSPACEDIR)\</WorkspaceDir>
+    <WorkspaceOutRoot>$(XWORKSPACEDIR)\output\</WorkspaceOutDir>
+    <CommonOutRoot>$(SolutionDir)output\</RobloxClientDir>
+    <CommonIntRoot>$(SolutionDir)output\intermediate\$(ProjectName)\</RobloxClientDir>
+    <CommonOutDirName>win_$(Platform.ToLower().Replace("win32", "x86"))_$(Configuration.ToLower())</CommonOutDirName>
+    <CommonOutDirName Condition="'$(ApplicationType)' == 'Windows Store'">winuwp_$(Platform.ToLower().Replace("win32", "x86"))_$(Configuration.ToLower())</CommonOutDirName>
+    <WorkspaceOutDir>$(WorkspaceOutRoot)$(SolutionName)\$(CommonOutDirName)\</WorkspaceOutDir>
+    <OutDir>$(CommonOutRoot)$(CommonOutDirName)\</OutDir>
+    <IntDir>$(CommonIntRoot)$(CommonOutDirName)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)' == 'Release'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+	  <Optimization>Disabled</Optimization>
+	  <Optimization Condition="'$(Configuration)' == 'Release'">MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+	  <InlineFunctionExpansion Condition="'$(Configuration)' == 'Debug'">Default</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+	  <IntrinsicFunctions Condition="'$(Configuration)' == 'Debug'">false</IntrinsicFunctions>
+      <PreprocessorDefinitions Condition="'$(PlatformName)' == 'Durango'">__WRL_NO_DEFAULT_LIB__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)' == 'Debug'">_DEBUG;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)' == 'NoOpt'">_NOOPT;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)' == 'Release'">NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(ApplicationType)' == 'Windows Store'">_WIN32_WINNT=0x0A00;WINVER=0x0A00;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)' != 'Debug'">_SECURE_SCL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;WIN32;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions>/w44101 /w34244 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(ApplicationType)' != 'Windows Store' OR '$(PlatformName)' == 'Durango'">/Zm450 /w44101 /w34244 %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+	  <OmitFramePointers>false</OmitFramePointers>
+	  <DebugInformationFormat Condition="'$(Configuration)'=='Debug' AND '$(PlatformName)' != 'Durango'">EditAndContinue</DebugInformationFormat>
+	  <DebugInformationFormat Condition="'$(Configuration)'!='Debug' OR  '$(PlatformName)' == 'Durango'">ProgramDatabase</DebugInformationFormat>
+      <RuntimeLibrary Condition="'$(Configuration)' != 'Debug'">MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)' == 'Debug'">MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(PlatformName)' != 'Durango' AND '$(Configuration)' != 'Debug'">MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(PlatformName)' != 'Durango' AND '$(Configuration)' == 'Debug'">MultiThreadedDebug</RuntimeLibrary>
+      <TreatSpecificWarningsAsErrors>4477</TreatSpecificWarningsAsErrors>
+	  <AdditionalIncludeDirectories>$(ProjectDir)include;$(SolutionDir)include;$(WorkspaceDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+	  <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <OptimizeReferences>
+      </OptimizeReferences>
+      <EnableCOMDATFolding>
+      </EnableCOMDATFolding>
+      <OptimizeReferences Condition="'$(Configuration)' == 'Release'">true</OptimizeReferences>
+      <EnableCOMDATFolding Condition="'$(Configuration)' == 'Release'">true</EnableCOMDATFolding>
+    </Link>
+  </ItemDefinitionGroup>
+</Project>
