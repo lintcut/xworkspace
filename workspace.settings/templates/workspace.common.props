@@ -3,6 +3,7 @@
   <PropertyGroup Label="Configuration">
     <UseDebugLibraries Condition="'$(Configuration)' != 'Debug'">false</UseDebugLibraries>
     <UseDebugLibraries Condition="'$(Configuration)' == 'Debug'">true</UseDebugLibraries>
+    <DisableFastUpToDateCheck Condition="'$(ConfigurationType)' == 'Utility'">true</DisableFastUpToDateCheck>
   </PropertyGroup>
   <PropertyGroup>
     <_PropertySheetDisplayName>XWorkspace Common Properties</_PropertySheetDisplayName>
