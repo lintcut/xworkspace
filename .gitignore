@@ -3,7 +3,5 @@
 #	- workspace.docs
 
 *
-!/xws
-!/xincude
+!/.xws
 !/workspace.settings
-!/include
