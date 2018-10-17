@@ -7,8 +7,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <_PropertySheetDisplayName>XWorkspace Common Properties</_PropertySheetDisplayName>
-    <WorkspaceDir>$(XWORKSPACEDIR)\</WorkspaceDir>
-    <WorkspaceOutRoot>$(XWORKSPACEDIR)\output\</WorkspaceOutRoot>
+    <WorkspaceDir>$(XWSROOT)\</WorkspaceDir>
+    <WorkspacePriDir>$(XWSROOT)\.xws\</WorkspacePriDir>
+    <WorkspaceOutRoot>$(XWSROOT)\output\</WorkspaceOutRoot>
     <CommonOutRoot>$(SolutionDir)output\</CommonOutRoot>
     <CommonIntRoot>$(SolutionDir)output\intermediate\$(ProjectName)\</CommonIntRoot>
     <CommonOutDirName>win_$(Platform.ToLower().Replace("win32", "x86"))_$(Configuration.ToLower())</CommonOutDirName>
@@ -47,7 +48,7 @@
       <RuntimeLibrary Condition="'$(PlatformName)' != 'Durango' AND '$(Configuration)' != 'Debug'">MultiThreaded</RuntimeLibrary>
       <RuntimeLibrary Condition="'$(PlatformName)' != 'Durango' AND '$(Configuration)' == 'Debug'">MultiThreadedDebug</RuntimeLibrary>
       <TreatSpecificWarningsAsErrors>4477</TreatSpecificWarningsAsErrors>
-	  <AdditionalIncludeDirectories>$(ProjectDir)include;$(SolutionDir)include;$(WorkspaceDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+	  <AdditionalIncludeDirectories>$(ProjectDir)include;$(SolutionDir)include;$(WorkspacePriDir)xinclude;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
 	  <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
