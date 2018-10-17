@@ -1,5 +1,5 @@
 # Exclude everything except directory:
-#	- /__xws__
+#	- /.xws
 
 *
-!/__xws__
+!/.xws
