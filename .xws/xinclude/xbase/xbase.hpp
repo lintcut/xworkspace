@@ -1,7 +1,7 @@
 #pragma once
 #include "xbase/xbasedef.h"
 
-namespace xb {
+namespace xbase {
 
 class global
 {

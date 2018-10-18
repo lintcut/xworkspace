@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-namespace xb {
+namespace xbase {
 namespace utils {
 
 namespace

@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace xb {
+namespace xbase {
 namespace algorithm {
 
 template<size_t... I>
