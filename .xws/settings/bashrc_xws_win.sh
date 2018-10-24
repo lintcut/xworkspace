@@ -47,7 +47,7 @@ echo "  Java32 Directory: `xwsGetJava32Dir`"
 xwsGetJdk64Dir(){
     java64Dir=`echo \`xwsGetJava64Dir\``
     if [ -d "$java64Dir" ]; then
-        versions=`ls "$java64Dir" | grep "jdk-" | grep -e "[\.0123456789]" | sort -r`
+        versions=`ls "$java64Dir" | grep "jdk-" | grep -e "[\.0123456789]" | sed 's/\/$//' | sort -r`
         arr=($versions)
         if [ -d "$java64Dir/${arr[0]}" ]; then
             echo "$java64Dir/${arr[0]}"
@@ -58,7 +58,7 @@ xwsGetJdk64Dir(){
 xwsGetJdk32Dir(){
     java32Dir=`echo \`xwsGetJava32Dir\``
     if [ -d "$java32Dir" ]; then
-        versions=`ls "$java32Dir" | grep "jdk-" | grep -e "[\.0123456789]" | sort -r`
+        versions=`ls "$java32Dir" | grep "jdk-" | grep -e "[\.0123456789]" | sed 's/\/$//' | sort -r`
         arr=($versions)
         if [ -d "$java32Dir/${arr[0]}" ]; then
             echo "$java32Dir/${arr[0]}"
@@ -69,7 +69,7 @@ xwsGetJdk32Dir(){
 xwsGetJre64Dir(){
     java64Dir=`echo \`xwsGetJava64Dir\``
     if [ -d "$java64Dir" ]; then
-        versions=`ls "$java64Dir" | grep "jre-" | grep -e "[\.0123456789]" | sort -r`
+        versions=`ls "$java64Dir" | grep "jre-" | grep -e "[\.0123456789]" | sed 's/\/$//' | sort -r`
         arr=($versions)
         if [ -d "$java64Dir/${arr[0]}" ]; then
             echo "$java64Dir/${arr[0]}"
@@ -80,7 +80,7 @@ xwsGetJre64Dir(){
 xwsGetJre32Dir(){
     java32Dir=`echo \`xwsGetJava32Dir\``
     if [ -d "$java32Dir" ]; then
-        versions=`ls "$java32Dir" | grep "jre-" | grep -e "[\.0123456789]" | sort -r`
+        versions=`ls "$java32Dir" | grep "jre-" | grep -e "[\.0123456789]" | sed 's/\/$//' | sort -r`
         arr=($versions)
         if [ -d "$java32Dir/${arr[0]}" ]; then
             echo "$java32Dir/${arr[0]}"
@@ -102,10 +102,10 @@ xwsGetNewestVisualStudioVersion(){
 xwsGetWinSdkVersions(){
     dirProgramFiles86=`xwsGetProgramFiles86`
     if [ -d "$dirProgramFiles86/Windows Kits" ]; then
-        kitsVersions=`ls "$dirProgramFiles86/Windows Kits" | grep -e "[\.0123456789]"`
+        kitsVersions=`ls "$dirProgramFiles86/Windows Kits" | grep -e "[\.0123456789]" | sed 's/\/$//'`
         for ver in $kitsVersions; do
             if [ $ver. == 10. ]; then
-                fullVersions=`ls "$dirProgramFiles86/Windows Kits/$ver/Include" | grep -e "[\.0123456789]" | sort -r`
+                fullVersions=`ls "$dirProgramFiles86/Windows Kits/$ver/Include" | grep -e "[\.0123456789]" | sed 's/\/$//' | sort -r`
                 for item in $fullVersions; do
                     if [ -d "$dirProgramFiles86/Windows Kits/$ver/Include/$item/um" ]; then
                         result=`echo $result $item`
@@ -133,10 +133,10 @@ xwsGetNewestWinSdkVersion(){
 xwsGetWinWdkVersions(){
     dirProgramFiles86=`echo \`xwsGetProgramFiles86\``
     if [ -d "$dirProgramFiles86/Windows Kits" ]; then
-        kitsVersions=`ls "$dirProgramFiles86/Windows Kits" | grep -e "[\.0123456789]"`
+        kitsVersions=`ls "$dirProgramFiles86/Windows Kits" | grep -e "[\.0123456789]" | sed 's/\/$//'`
         for ver in $kitsVersions; do
             if [ $ver. == 10. ]; then
-                fullVersions=`ls "$dirProgramFiles86/Windows Kits/$ver/Include" | grep -e "[\.0123456789]" | sort -r`
+                fullVersions=`ls "$dirProgramFiles86/Windows Kits/$ver/Include" | grep -e "[\.0123456789]" | sed 's/\/$//' | sort -r`
                 for item in $fullVersions; do
                     if [ -d "$dirProgramFiles86/Windows Kits/$ver/Include/$item/km" ]; then
                         result=`echo $result $item`
@@ -197,6 +197,18 @@ export XJDK64DIR=`echo \`xwsGetJdk64Dir\``
 export XJRE32DIR=`echo \`xwsGetJre32Dir\``
 export XJRE64DIR=`echo \`xwsGetJre64Dir\``
 
+if [ ! -z "$XJDK64DIR" ]; then
+	export XJDKHOME=`echo $XJDK64DIR`
+elif [ ! -z "$XJDK32DIR" ]; then
+	export XJDKHOME=`echo $XJDK32DIR`
+else
+	echo "JDK not installed"
+fi
+
+if [ ! -z "$XJDKHOME" ]; then
+	export PATH=$PATH:"$XJDKHOME/bin"
+fi
+
 export XVSVER=`echo \`xwsGetNewestVisualStudioVersion\``
 if [ -d "$dirProgramFiles86/Microsoft Visual Studio $XVSVER" ]; then
     export XVSDIR="$dirProgramFiles86/Microsoft Visual Studio $XVSVER"
@@ -249,6 +261,7 @@ echo "  JDK (32 bits): $XJDK32DIR"
 echo "  JDK (64 bits): $XJDK64DIR"
 echo "  JRE (32 bits): $XJRE32DIR"
 echo "  JRE (64 bits): $XJRE64DIR"
+echo "  JDKHOME:       $XJDKHOME"
 
 ##
 ##  Alias
