@@ -9,6 +9,7 @@
     <_PropertySheetDisplayName>XWorkspace Common Properties</_PropertySheetDisplayName>
     <WorkspaceDir>$(XWSROOT)\</WorkspaceDir>
     <WorkspacePriDir>$(XWSROOT)\.xws\</WorkspacePriDir>
+    <BoostDir Condition="'$(BOOST_DIR)' != ''">$(BOOST_DIR.Replace("/", "\"))\</BoostDir>
     <WorkspaceOutRoot>$(XWSROOT)\output\</WorkspaceOutRoot>
     <CommonOutRoot>$(SolutionDir)output\</CommonOutRoot>
     <CommonIntRoot>$(SolutionDir)output\intermediate\$(ProjectName)\</CommonIntRoot>
@@ -49,9 +50,11 @@
       <RuntimeLibrary Condition="'$(PlatformName)' != 'Durango' AND '$(Configuration)' == 'Debug'">MultiThreadedDebug</RuntimeLibrary>
       <TreatSpecificWarningsAsErrors>4477</TreatSpecificWarningsAsErrors>
 	  <AdditionalIncludeDirectories>$(ProjectDir)include;$(SolutionDir)include;$(WorkspacePriDir)xinclude;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+	  <AdditionalIncludeDirectories Condition="'$(BoostDir)' != ''">$(ProjectDir)include;$(SolutionDir)include;$(WorkspacePriDir)xinclude;$(BoostDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
 	  <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+	  <AdditionalLibraryDirectories Condition="'$(BoostDir)' != ''">$(OutDir);$(BoostDir)libs\$(CommonOutDirName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OptimizeReferences>
       </OptimizeReferences>
