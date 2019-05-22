@@ -3,6 +3,7 @@
 #include <chrono>
 #include <string>
 #include <ctime>
+#include <iomanip>
 #ifdef _WIN32
 #include <Windows.h>
 #endif
@@ -173,6 +174,49 @@ public:
     {
         std::chrono::microseconds ms = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch());
         return xtime((int64_t)ms.count());
+    }
+
+    static xtime from_tm(std::tm* ptm)
+    {
+        return xtime((int64_t)std::mktime(ptm));
+    }
+
+    static xtime from_timestamp(const std::string& st)
+    {
+        // from following format
+        //    a. GMT:   "yyyy-mm-ddTHH:MM:SSZ"
+        //    b. GMT:   "yyyy-mm-ddTHH:MM:SS.mmmZ"
+        //    c. LOCAL: "yyyy-mm-dd HH:MM:SS"
+        //    d. LOCAL: "yyyy-mm-dd HH:MM:SS.mmm"
+        xtime result;
+        if (!st.empty()) {
+            const bool gmt = (st[st.length() - 1] == 'Z') ? true : false;
+            const bool millisec = (std::string::npos != st.find('.'));
+            std::tm itm;
+            if (gmt) {
+                if (millisec) {
+                }
+                else {
+                }
+            }
+            else {
+                if (millisec) {
+                }
+                else {
+                }
+            }
+
+            std::istringstream ss(st);
+            ss.imbue(std::locale("de_DE.utf-8"));
+            ss >> std::get_time(&t, "%Y-%b-%d %H:%M:%S");
+            if (ss.fail()) {
+                std::cout << "Parse failed\n";
+            }
+            else {
+                std::cout << std::put_time(&t, "%c") << '\n';
+            }
+        }
+        return xtime();
     }
 
     operator int64_t () const { return t; }
