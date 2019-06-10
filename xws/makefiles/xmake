@@ -1,0 +1,292 @@
+#################################################################
+######  			XWORKSPACE MAKEFILE					  #######
+#################################################################
+
+#-----------------------------------#
+#			Makefile Arguments		#
+#-----------------------------------#
+
+# Target CPU Arch:
+#	- x86:		x86 cpu
+#	- x64:		x64 cpu
+#	- arm:		arm cpu
+#	- arm64:	arm64 cpu
+#ifeq ($(BUILDARCH),)
+#    $(error xmake: BUILDARCH is not defined)
+#endif
+
+# BuildType:
+#	- debug:	debug build
+#	- release:	release build
+#	- noopt:	release, but without optimization
+#ifeq ($(BUILDTYPE),)
+#    $(error xmake: BUILDTYPE is not defined)
+#endif
+
+ifeq ($(TGTNAME),)
+    $(error xmake: TGTNAME is not defined)
+endif
+
+ifeq ($(THREADMODE),)
+    THREADMODE=mt
+endif
+
+ifeq ($(WARNS_AS_ERROR),)
+    WARNS_AS_ERROR=all
+endif
+
+
+#-----------------------------------#
+#			System Arguments		#
+#-----------------------------------#
+
+# Workspace Root Path
+ifeq ($(XWSROOT),)
+    $(error xmake: XWSROOT is not defined)
+endif
+
+# OS name (Windows, Mac, Linux)
+ifeq ($(XOS),)
+    $(error xmake: XOS is not defined, please make sure "bashrc_xws.sh" has been run)
+endif
+
+ifeq ($(XOS),Windows)
+    include $(XWS)/xws/makefiles/xmake.env.win
+else ifeq ($(XOS),Mac)
+    include $(XWS)/xws/makefiles/xmake.env.mac
+else ifeq ($(XOS),Linux)
+    include $(XWS)/xws/makefiles/xmake.env.linux
+else
+    $(error xmake: XOS ("$(XOS)") is unknown)
+endif
+
+
+#-----------------------------------#
+#		Names and Paths				#
+#-----------------------------------#
+
+OUTDIRNAME=$(TGTPLATFORM)_$(BUILDTYPE)_$(BUILDARCH)_$(THREADMODE)
+INTDIR=output/intermediate/$(OUTDIRNAME)
+OUTDIR=output/$(OUTDIRNAME)
+
+
+#-----------------------------------#
+#				Sources				#
+#-----------------------------------#
+SOURCETYPES=c* asm
+SEARCH_DEPTH=10
+ifeq (,$(TGTSRCDIRS))
+    TGTSRCDIRS=.
+endif
+
+# 1. Prepare Source Dirs List
+TGTSRCDIRS:=$(foreach d, $(TGTSRCDIRS), $(shell find $(d) -maxdepth $(SEARCH_DEPTH) -type d | sed 's/^\.\///' | grep -v '^\..*'))
+# 2. Find pch source file
+# 2. Get c/cpp/cxx/asm files
+#		- enum files
+SOURCES = $(foreach dir, $(TGTSRCDIRS), $(foreach pattern, c* asm s, $(wildcard $(dir)/*.$(pattern))))
+# 		- exclude precompile header source file
+ifneq (,$(TGTPCHNAME))
+    TGTPCHSRC := $(filter %$(TGTPCHNAME).cpp, $(SOURCES))
+    ifeq ($(TGTPCHSRC),)
+        $(error 'Precompiled source file not found $(TGTPCHSRC)')
+	endif
+    SOURCES := $(filter-out $(TGTPCHSRC),$(SOURCES))
+else
+    
+endif
+# 2. Get resource file
+RESOURCES = $(foreach dir, $(TGTSRCDIRS), $(foreach pattern, rc, $(wildcard $(dir)/*.$(pattern))))
+# 3. Get manifest file
+MANIFESTS = $(foreach dir, $(TGTSRCDIRS), $(foreach pattern, manifest, $(wildcard $(dir)/*.$(pattern))))
+# 4. Get IDL file (for COM)
+IDLS = $(foreach dir, $(TGTSRCDIRS), $(foreach pattern, idl, $(wildcard $(dir)/*.$(pattern))))
+ifneq (,$(IDLS))
+    SOURCES := $(SOURCES) $(foreach idl, $(IDLS), $(basename $(notdir $(idl)))_i.c $(basename $(notdir $(idl)))_p.c)
+endif
+# 5. DEF file (used by DLL)
+ifeq (dll,$(TGTTYPE))
+    DEFFILE = $(foreach dir, $(TGTSRCDIRS), $(wildcard $(dir)/*.def))
+    COUNT_OF_DEFFILES := $(words $(DEFFILE))
+    ifneq (1, $(COUNT_OF_DEFFILES))
+        $(error "xmake: Too many *.def files > $(DEFFILE)")
+    endif
+endif
+
+# Make sure VPATH include all source dirs
+VPATH := $(sort $(TGTSRCDIRS))
+
+# Generate Obj files list
+OBJS = $(foreach f, $(SOURCES), $(addsuffix .o,$(basename $(notdir $f))))
+
+#-----------------------------------#
+#				Includes			#
+#-----------------------------------#
+
+# Additional Include paths
+
+# Additional Lib paths
+ADDITIONAL_LIBDIRS=
+
+# Additional Lib paths
+ADDITIONAL_LIBS=
+
+#-----------------------------------#
+#				Flags				#
+#-----------------------------------#
+
+# Compiler flags
+ADDITIONAL_CFLAGS=
+ADDITIONAL_CXXFLAGS=
+# Linker flags
+ADDITIONAL_LFLAGS=
+
+INFLAG=-c
+OUTFLAG=-Fo
+
+#-----------------------------------#
+#			Build Rules				#
+#-----------------------------------#
+
+# Rule for building ASM files
+%.o: %.s
+	@if [ ! -d $(INTDIR) ] ; then \
+	  mkdir -p $(INTDIR) ; \
+	fi
+	@echo '"$(CC)" $(CFLAGS) $(PCHUFLAGS) $(IFLAGS) $(INFLAG) $< $(OUTFLAG)$(INTDIR)$@'
+	@"$(CC)" $(CFLAGS) $(PCHUFLAGS) $(IFLAGS) $(INFLAG) $< $(OUTFLAG)$(INTDIR)/$@
+
+%.o: %.asm
+	@if [ ! -d $(INTDIR) ] ; then \
+	  mkdir -p $(INTDIR) ; \
+	fi
+	@echo '"$(CC)" $(CFLAGS) $(PCHUFLAGS) $(IFLAGS) $(INFLAG) $< $(OUTFLAG)$(INTDIR)$@'
+	@"$(CC)" $(CFLAGS) $(PCHUFLAGS) $(IFLAGS) $(INFLAG) $< $(OUTFLAG)$(INTDIR)/$@
+
+# Rule for building C files
+%.o: %.c
+	@if [ ! -d $(INTDIR) ] ; then \
+	  mkdir -p $(INTDIR) ; \
+	fi
+	@echo '"$(CC)" $(CFLAGS) $(PCHUFLAGS) $(IFLAGS) $(INFLAG) $< $(OUTFLAG)$(INTDIR)$@'
+	@"$(CC)" $(CFLAGS) $(PCHUFLAGS) $(IFLAGS) $(INFLAG) $< $(OUTFLAG)$(INTDIR)/$@
+
+
+# Rule for building C++ files
+%.o: %.cpp
+	@if [ ! -d $(INTDIR) ] ; then \
+	  mkdir -p $(INTDIR) ; \
+	fi
+	@echo '"$(CXX)" $(CXXFLAGS) $(PCHUFLAGS) $(IFLAGS) $(INFLAG) $< $(OUTFLAG)$(INTDIR)/$@'
+	@"$(CXX)" $(CXXFLAGS) $(PCHUFLAGS) $(IFLAGS) $(INFLAG) $< $(OUTFLAG)$(INTDIR)/$@
+
+# Rule for Precompiled Header File
+$(TGTNAME).pch: $(TGTPCHSRC)
+	@if [ ! -d $(INTDIR) ] ; then \
+	  mkdir -p $(INTDIR) ; \
+	fi
+	@echo '"$(CXX)" $(CXXFLAGS) $(PCHCFLAGS) $(IFLAGS) $(INFLAG) $< $(OUTFLAG)$(INTDIR)'
+	@"$(CXX)" $(CXXFLAGS) $(PCHCFLAGS) $(IFLAGS) $(INFLAG) $< $(OUTFLAG)$(INTDIR)
+
+# Rule for building the resources
+%.res: %.rc
+	@if [ ! -d $(INTDIR) ] ; then \
+	  mkdir -p $(INTDIR) ; \
+	fi
+	@echo '"$(RC)" $(RCFLAGS) $(IFLAGS) -Fo$(INTDIR)$@ $<'
+	@"$(RC)" $(RCFLAGS) $(IFLAGS) -Fo$(INTDIR)/$@ $<
+
+# Rule for building MIDL files
+%.tlb %.h %_i.c %_p.c: %.idl
+	@if [ ! -d $(INTDIR) ] ; then \
+	  mkdir -p $(INTDIR) ; \
+	fi
+	@echo '"$(MIDL)" $(MIDL_CFLAGS) $(MIDL_DFLAGS) $(IFLAGS) /out $(INTDIR) $<'
+	@"$(MIDL)" $(MIDL_CFLAGS) $(MIDL_DFLAGS) $(IFLAGS) /out $(INTDIR) $<
+
+#
+#  OUTPUT
+#
+
+# Rule for Output: Library
+$(TGTNAME).lib: $(PCHFILE) $(OBJS) $(RCOBJS)
+	@echo Generating library ...
+	@echo Succeed
+
+# Rule for Output: Dll
+$(TGTNAME).dll: $(PCHFILE) $(OBJS) $(RCOBJS)
+	@echo Generating DLL ...
+	@echo Succeed
+	
+$(TGTNAME).so: $(PCHFILE) $(OBJS) $(RCOBJS)
+	@echo Generating SO ...
+	@echo Succeed
+
+# Rule for Output: App
+$(TGTNAME).exe: $(PCHFILE) $(OBJS) $(RCOBJS)
+	@echo Generating EXE ...
+	@echo Succeed
+	
+$(TGTNAME).app: $(PCHFILE) $(OBJS) $(RCOBJS)
+	@echo Generating APP ...
+	@echo Succeed
+
+# Rule for Output: Sys
+$(TGTNAME).sys: $(PCHFILE) $(OBJS) $(RCOBJS)
+	@echo Generating SYS ...
+	@echo Succeed
+	
+.PHONY: printsrcs
+.PHONY: printobjs
+
+.PHONY: buildall
+.PHONY: buildclean
+
+printsrcs:
+	@echo 'PCH:'
+	@echo "  $(TGTPCHSRC)"
+	@echo 'Sources:'
+	@for f in $(SOURCES) ; do echo "  $$f" ; done
+	@echo 'Resources:'
+	@for f in $(RESOURCES) ; do echo "  $$f" ; done
+	@echo 'IDLs:'
+	@for f in $(IDLS) ; do echo "  $$f" ; done
+	@if [ $(TGTTYPE). == dll. ]; then \
+		echo 'DEF: $(DEFFILE)' ; \
+	fi
+	@echo 'MANIFESTSs:'
+	@for f in $(MANIFESTS) ; do echo "  $$f" ; done
+
+printobjs:
+	@echo 'OBJs:'
+	@echo "  $(PCHFILE)"
+	@for f in $(OBJS) ; do echo "  $$f" ; done
+
+buildcheck:
+	@echo 'Build Parameters Check:'
+	@if [ $(BUILDARCH). == . ]; then \
+	    echo 'error: BUILDARCH is not defined' ; \
+	    exit 1 ; \
+	fi
+	@if [ $(BUILDTYPE). == . ]; then \
+	    echo 'error: BUILDTYPE is not defined' ; \
+	    exit 1 ; \
+	fi
+
+buildall: buildcheck printsrcs printobjs $(PCHFILE) $(OBJS)
+	@echo Build finished
+	
+buildclean:
+	@if [[ $(BUILDARCH). == . || $(BUILDTYPE). == . ]]; then \
+	    echo 'Clean all' ; \
+		echo '  - deleting "output" ...' ; \
+		rm -rf output ; \
+		echo '  - deleting "$(PKGROOT)/output" ...' ; \
+		rm -rf "$(PKGROOT)/output" ; \
+	else \
+	    echo 'Clean $(OUTDIRNAME)' ; \
+		echo '  - deleting "$(INTDIR)" ...' ; \
+		rm -rf "$(INTDIR)" ; \
+		echo '  - deleting "$(OUTDIR)" ...' ; \
+		rm -rf "$(OUTDIR)" ; \
+	fi

@@ -1,0 +1,4 @@
+#pragma once
+
+#define XVAULT_NAME_WIN32W  L"XVAULT"
+#define XVAULT_NAME_WIN32A   "XVAULT"

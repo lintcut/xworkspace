@@ -3,6 +3,12 @@
 ##  Functions
 ##
 
+# get current script dir, no matter how it is called
+xwsGetScriptDir(){
+    scriptDir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )
+    echo $scriptDir
+}
+
 # lower-case string
 xwstolower(){
     echo "$1" | sed "y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/"
@@ -31,10 +37,9 @@ xwsgetos(){
 
 # get XWSROOT
 xwsgetroot(){
-    CURDIR=`pwd`
-    DOTXWS=`dirname $CURDIR`
-    XWS=`dirname $DOTXWS`
-    echo $XWS
+    scriptDir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )
+    rootDir=`echo $scriptDir | sed 's/\/[a-zA-Z]*\/[a-zA-Z]*$//'`
+    echo $rootDir
 }
 
 ##
@@ -45,13 +50,13 @@ export XWSROOT=`echo \`xwsgetroot\``
 export XOS=`echo \`xwsgetos\``
 #  -> Load OS-related files
 if [ $XOS == Windows ]; then
-    source $XWSROOT/.xws/settings/bashrc_xws_win.sh
+    source $XWSROOT/xws/settings/bashrc_xws_win.sh
 elif [ $XOS == Linux ]; then
-    source $XWSROOT/.xws/settings/bashrc_xws_linux.sh
+    source $XWSROOT/xws/settings/bashrc_xws_linux.sh
 elif [ $XOS == FreeBSD ]; then
-    source $XWSROOT/.xws/settings/bashrc_xws_linux.sh
+    source $XWSROOT/xws/settings/bashrc_xws_linux.sh
 elif [ $XOS == Mac ]; then
-    source $XWSROOT/.xws/settings/bashrc_xws_mac.sh
+    source $XWSROOT/xws/settings/bashrc_xws_mac.sh
 else
     echo Unknown OS, failed.
 fi
@@ -63,6 +68,14 @@ fi
 # Common
 alias cls='clear'
 alias cdw='cd $XWSROOT'
+
+# build
+alias makex86rel='make BUILDARCH=x86 BUILDTYPE=release'
+alias makex86dbg='make BUILDARCH=x86 BUILDTYPE=debug'
+alias makex86nop='make BUILDARCH=x86 BUILDTYPE=noopt'
+alias makex64rel='make BUILDARCH=x64 BUILDTYPE=release'
+alias makex64dbg='make BUILDARCH=x64 BUILDTYPE=debug'
+alias makex64nop='make BUILDARCH=x64 BUILDTYPE=noopt'
 
 # Git Alias
 #  -> get status

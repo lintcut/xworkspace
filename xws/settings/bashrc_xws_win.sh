@@ -4,12 +4,13 @@ echo XWorkspace: Run Windows init scripts ...
 ##  Functions
 ##
 
-xwsGetProgramFiles64(){
-    if [ -d "/c/Program Files (x86)" ]; then
-        echo "/c/Program Files"
-    else
-        echo ""
-    fi
+xwsGetScriptDir(){
+    scriptDir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )
+    echo $scriptDir
+}
+
+xwsGetProgramFiles(){
+    echo "/c/Program Files"
 }
 
 xwsGetProgramFiles86(){
@@ -20,10 +21,19 @@ xwsGetProgramFiles86(){
     fi
 }
 
-export dirProgramFiles64=`echo \`xwsGetProgramFiles64\``
-echo "  ProgramFilesX64 Directory: $dirProgramFiles64"
+export dirProgramFiles=`echo \`xwsGetProgramFiles\``
+echo "  ProgramFiles Directory: $dirProgramFiles"
 export dirProgramFiles86=`echo \`xwsGetProgramFiles86\``
 echo "  ProgramFilesX86 Directory: $dirProgramFiles86"
+
+xwsGetRoot(){
+    scriptDir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )
+    rootDir=`echo $scriptDir | sed 's/\/[a-zA-Z]*\/[a-zA-Z]*$//'`
+    echo $rootDir
+}
+
+export XWS=`echo \`xwsGetRoot\``
+echo "  XWS Root Directory: $XWS"
 
 xwsGetJava64Dir(){
     if [ -d "$dirProgramFiles64/Java" ]; then
@@ -47,7 +57,7 @@ echo "  Java32 Directory: `xwsGetJava32Dir`"
 xwsGetJdk64Dir(){
     java64Dir=`echo \`xwsGetJava64Dir\``
     if [ -d "$java64Dir" ]; then
-        versions=`ls "$java64Dir" | grep "jdk-" | grep -e "[\.0123456789]" | sed 's/\/$//' | sort -r`
+        versions=`ls "$java64Dir" | grep -e "jdk-[\.0123456789]" | sed 's/\/$//' | sort -nr`
         arr=($versions)
         if [ -d "$java64Dir/${arr[0]}" ]; then
             echo "$java64Dir/${arr[0]}"
@@ -58,7 +68,7 @@ xwsGetJdk64Dir(){
 xwsGetJdk32Dir(){
     java32Dir=`echo \`xwsGetJava32Dir\``
     if [ -d "$java32Dir" ]; then
-        versions=`ls "$java32Dir" | grep "jdk-" | grep -e "[\.0123456789]" | sed 's/\/$//' | sort -r`
+        versions=`ls "$java32Dir" | grep "jdk-" | grep -e "[\.0123456789]" | sed 's/\/$//' | sort -nr`
         arr=($versions)
         if [ -d "$java32Dir/${arr[0]}" ]; then
             echo "$java32Dir/${arr[0]}"
@@ -89,7 +99,13 @@ xwsGetJre32Dir(){
 }
 
 xwsGetVisualStudioVersions(){
-    echo `ls "$dirProgramFiles86" | grep "Microsoft Visual Studio " | sort -r | sed "s/Microsoft Visual Studio //"`
+    versions=`echo \`ls "$dirProgramFiles86" | grep "Microsoft Visual Studio " | sed "s/Microsoft Visual Studio //" | sort -nr\``
+    for ver in $versions; do
+        if [ -f "$dirProgramFiles86/Microsoft Visual Studio $ver/VC/bin/cl.exe" ]; then
+            result=`echo $result $ver`
+        fi
+    done
+    echo $result
 }
 
 xwsGetNewestVisualStudioVersion(){
@@ -98,9 +114,26 @@ xwsGetNewestVisualStudioVersion(){
     echo ${arr[0]}
 }
 
+xwsGetVisualStudioVersion(){
+    versions=`echo \`xwsGetVisualStudioVersions\``
+    if [ $1. == . ]; then
+        versions=`echo \`xwsGetVisualStudioVersions\``
+        arr=($versions)
+        echo ${arr[0]}
+    else
+        for ver in $versions; do
+            if [ $ver. == $1. ]; then
+                result=`echo $ver`
+                echo $result
+                break
+            fi
+        done
+    fi
+}
+
 # get windows SDK version list
 xwsGetWinSdkVersions(){
-    dirProgramFiles86=`xwsGetProgramFiles86`
+    dirProgramFiles86=`echo \`xwsGetProgramFiles86\``
     if [ -d "$dirProgramFiles86/Windows Kits" ]; then
         kitsVersions=`ls "$dirProgramFiles86/Windows Kits" | grep -e "[\.0123456789]" | sed 's/\/$//'`
         for ver in $kitsVersions; do
@@ -133,14 +166,18 @@ xwsGetNewestWinSdkVersion(){
 xwsGetWinWdkVersions(){
     dirProgramFiles86=`echo \`xwsGetProgramFiles86\``
     if [ -d "$dirProgramFiles86/Windows Kits" ]; then
-        kitsVersions=`ls "$dirProgramFiles86/Windows Kits" | grep -e "[\.0123456789]" | sed 's/\/$//'`
+        kitsVersions=`ls "$dirProgramFiles86/Windows Kits" | grep -e "[\.0123456789]" | sed 's/\/$//' | sort -nr`
         for ver in $kitsVersions; do
             if [ $ver. == 10. ]; then
-                fullVersions=`ls "$dirProgramFiles86/Windows Kits/$ver/Include" | grep -e "[\.0123456789]" | sed 's/\/$//' | sort -r`
+                fullVersions=`ls "$dirProgramFiles86/Windows Kits/$ver/Include" | grep -e "[\.0123456789]" | sed 's/\/$//' | sort -nr`
                 for item in $fullVersions; do
-                    if [ -d "$dirProgramFiles86/Windows Kits/$ver/Include/$item/km" ]; then
-                        result=`echo $result $item`
+                    if [ ! -d "$dirProgramFiles86/Windows Kits/$ver/Include/$item/km" ]; then
+                        continue
                     fi
+                    if [ ! -d "$dirProgramFiles86/Windows Kits/$ver/Lib/$item/km" ]; then
+                        continue
+                    fi
+                    result=`echo $result $item`
                 done
             else
                 if [ -d "$dirProgramFiles86/Windows Kits/$ver/Include/km" ]; then
@@ -214,7 +251,6 @@ if [ -d "$dirProgramFiles86/Microsoft Visual Studio $XVSVER" ]; then
     export XVSDIR="$dirProgramFiles86/Microsoft Visual Studio $XVSVER"
 fi
 
-
 export XSDKVER=`echo \`xwsGetNewestWinSdkVersion\``
 if [ $XSDKVER. == . ]; then
     echo "ERROR: Windows SDK not found!"
@@ -238,7 +274,7 @@ else
     export XWDKVERMAJOR=`echo \`xwsGetWinKitVersionMajor $XWDKVER\``
     if [ $XWDKVERMAJOR. == 10. ]; then
         export XWDKDIR="$dirProgramFiles86/Windows Kits/10"
-        export XWDKINCDIR="$dirProgramFiles86/Windows Kits/10/Include/X$WDKVER"
+        export XWDKINCDIR="$dirProgramFiles86/Windows Kits/10/Include/$XWDKVER"
         export XWDKLIBDIR="$dirProgramFiles86/Windows Kits/10/Lib/$XWDKVER"
     else
         export XWDKDIR="$dirProgramFiles86/Windows Kits/$XWDKVER"
