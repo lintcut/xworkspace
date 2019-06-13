@@ -130,7 +130,7 @@ VPATH := $(sort $(TGTSRCDIRS))
 # Generate Obj files list
 OBJS = $(foreach f, $(SOURCES), $(addsuffix .o,$(basename $(notdir $f))))
 ifneq (,$(TGTPCHNAME))
-    PCHOBJ += $(TGTPCHNAME).obj
+    PCHOBJ += $(TGTPCHNAME).o
 endif
 
 # Generate res files list
@@ -222,7 +222,7 @@ $(TGTPCHNAME).pch: $(TGTPCHNAME).cpp
 	@if [ $(VERBOSE). == yes. ] ; then \
 		echo '"$(CXX)" $(CXXFLAGS) $(PCHCFLAGS) $(IFLAGS) $(INFLAG) $< $(COUTFLAG)$(INTDIR)' ; \
 	fi
-	@"$(CXX)" $(CXXFLAGS) $(PCHCFLAGS) $(IFLAGS) $(INFLAG) $< $(COUTFLAG)$(INTDIR)/ || exit 1
+	@"$(CXX)" $(CXXFLAGS) $(PCHCFLAGS) $(IFLAGS) $(INFLAG) $< $(COUTFLAG)$(INTDIR)/$(TGTPCHNAME).o || exit 1
 
 # Rule for building the resources
 %.res: %.rc
@@ -288,13 +288,17 @@ $(TGTNAME).dynlib: $(OBJS) $(RCOBJS)
 # Rule for Output: Executable
 $(TGTNAME).exe: $(OBJS) $(RCOBJS)
 	@echo "> Linking ..."
+	@if [ $(VERBOSE). == yes. ] ; then \
+		echo '"$(LINK)" $(LFLAGS) $^ $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).exe" $(TGTLIBS)' ; \
+	fi
+	@"$(LINK)" $(LFLAGS) $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).exe" $^ $(PCHOBJ) $(TGTLIBS)
 	@if [ ! -d $(OUTDIR) ] ; then \
 	  mkdir -p $(OUTDIR) ; \
 	fi
-	@if [ $(VERBOSE). == yes. ] ; then \
-		echo '"$(LINK)" $(LFLAGS) $^ $(LOUTFLAG)"$(OUTDIR)/$(TGTNAME).exe" $(TGTLIBS)' ; \
+	@mv -f "$(INTDIR)/$(TGTNAME).exe" "$(OUTDIR)/$(TGTNAME).exe"
+	@if [ $(XOS). == Windows. ] ; then \
+	  	mv -f "$(INTDIR)/$(TGTNAME).pdb" "$(OUTDIR)/$(TGTNAME).pdb" ; \
 	fi
-	@"$(LINK)" $(LFLAGS) $(LOUTFLAG)"$(OUTDIR)/$(TGTNAME).exe" $^ $(PCHOBJ) $(TGTLIBS)
 	
 $(TGTNAME): $(OBJS) $(RCOBJS)
 	@echo "> Linking ..."
