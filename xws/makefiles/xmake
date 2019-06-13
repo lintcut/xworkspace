@@ -35,6 +35,12 @@ ifeq ($(WARNS_AS_ERROR),)
     WARNS_AS_ERROR=all
 endif
 
+ifeq ($(TGTTYPE),drv)
+    ifneq ($(TGTMODE),kernel)
+        $(error xmake: Driver must be kernel mode)
+    endif
+endif
+
 
 #-----------------------------------#
 #			System Arguments		#
@@ -60,6 +66,9 @@ else
     $(error xmake: XOS ("$(XOS)") is unknown)
 endif
 
+TMSTART:=$(shell echo `date +%s`)
+CURSECONDS=$(shell echo `date +%s`)
+DURATION=$(shell echo $$(( $(CURSECONDS) - $(TMSTART) )))
 
 #-----------------------------------#
 #		Names and Paths				#
@@ -107,9 +116,11 @@ endif
 # 5. DEF file (used by DLL)
 ifeq (dll,$(TGTTYPE))
     DEFFILE = $(foreach dir, $(TGTSRCDIRS), $(wildcard $(dir)/*.def))
-    COUNT_OF_DEFFILES := $(words $(DEFFILE))
-    ifneq (1, $(COUNT_OF_DEFFILES))
-        $(error "xmake: Too many *.def files > $(DEFFILE)")
+    ifneq (,$(DEFFILE))
+        COUNT_OF_DEFFILES := $(words $(DEFFILE))
+        ifneq (1, $(COUNT_OF_DEFFILES))
+            $(error "xmake: Too many *.def files > $(DEFFILE)")
+        endif
     endif
 endif
 
@@ -118,6 +129,12 @@ VPATH := $(sort $(TGTSRCDIRS))
 
 # Generate Obj files list
 OBJS = $(foreach f, $(SOURCES), $(addsuffix .o,$(basename $(notdir $f))))
+ifneq (,$(TGTPCHNAME))
+    PCHOBJ += $(TGTPCHNAME).obj
+endif
+
+# Generate res files list
+RCOBJS = $(foreach f, $(RESOURCES), $(addsuffix .res,$(basename $(notdir $f))))
 
 #-----------------------------------#
 #				Includes			#
@@ -141,35 +158,50 @@ ADDITIONAL_CXXFLAGS=
 # Linker flags
 ADDITIONAL_LFLAGS=
 
-INFLAG=-c
-OUTFLAG=-Fo
-
 #-----------------------------------#
 #			Build Rules				#
 #-----------------------------------#
+
+ifeq (,$(INFLAG))
+    $(error xmake: Compiler's INFLAG is not defined)
+endif
+
+ifeq (,$(COUTFLAG))
+    $(error xmake: Compiler's OUTFLAG is not defined)
+endif
+
+ifeq (,$(LOUTFLAG))
+    $(error xmake: Linker's OUTFLAG is not defined)
+endif
 
 # Rule for building ASM files
 %.o: %.s
 	@if [ ! -d $(INTDIR) ] ; then \
 	  mkdir -p $(INTDIR) ; \
 	fi
-	@echo '"$(CC)" $(CFLAGS) $(PCHUFLAGS) $(IFLAGS) $(INFLAG) $< $(OUTFLAG)$(INTDIR)$@'
-	@"$(CC)" $(CFLAGS) $(PCHUFLAGS) $(IFLAGS) $(INFLAG) $< $(OUTFLAG)$(INTDIR)/$@
+	@if [ $(VERBOSE). == yes. ] ; then \
+		echo '"$(ML)" $(MLFLAGS) $(COUTFLAG) $(INTDIR)/$@ $(INFLAG) $<' ; \
+	fi
+	@"$(ML)" $(MLFLAGS) $(COUTFLAG) $(INTDIR)/$@ $(INFLAG) $< || exit 1
 
 %.o: %.asm
 	@if [ ! -d $(INTDIR) ] ; then \
 	  mkdir -p $(INTDIR) ; \
 	fi
-	@echo '"$(CC)" $(CFLAGS) $(PCHUFLAGS) $(IFLAGS) $(INFLAG) $< $(OUTFLAG)$(INTDIR)$@'
-	@"$(CC)" $(CFLAGS) $(PCHUFLAGS) $(IFLAGS) $(INFLAG) $< $(OUTFLAG)$(INTDIR)/$@
+	@if [ $(VERBOSE). == yes. ] ; then \
+		echo '"$(ML)" $(MLFLAGS) $(COUTFLAG) $(INTDIR)/$@ $(INFLAG) $<' ; \
+	fi
+	@"$(ML)" $(MLFLAGS) $(COUTFLAG) $(INTDIR)/$@ $(INFLAG) $< || exit 1
 
 # Rule for building C files
 %.o: %.c
 	@if [ ! -d $(INTDIR) ] ; then \
 	  mkdir -p $(INTDIR) ; \
 	fi
-	@echo '"$(CC)" $(CFLAGS) $(PCHUFLAGS) $(IFLAGS) $(INFLAG) $< $(OUTFLAG)$(INTDIR)$@'
-	@"$(CC)" $(CFLAGS) $(PCHUFLAGS) $(IFLAGS) $(INFLAG) $< $(OUTFLAG)$(INTDIR)/$@
+	@if [ $(VERBOSE). == yes. ] ; then \
+		echo '"$(CC)" $(CFLAGS) $(IFLAGS) $(INFLAG) $< $(COUTFLAG)$(INTDIR)/$@' ; \
+	fi
+	@"$(CC)" $(CFLAGS) $(IFLAGS) $(INFLAG) $< $(COUTFLAG)$(INTDIR)/$@ || exit 1
 
 
 # Rule for building C++ files
@@ -177,64 +209,109 @@ OUTFLAG=-Fo
 	@if [ ! -d $(INTDIR) ] ; then \
 	  mkdir -p $(INTDIR) ; \
 	fi
-	@echo '"$(CXX)" $(CXXFLAGS) $(PCHUFLAGS) $(IFLAGS) $(INFLAG) $< $(OUTFLAG)$(INTDIR)/$@'
-	@"$(CXX)" $(CXXFLAGS) $(PCHUFLAGS) $(IFLAGS) $(INFLAG) $< $(OUTFLAG)$(INTDIR)/$@
+	@if [ $(VERBOSE). == yes. ] ; then \
+		echo '"$(CXX)" $(CXXFLAGS) $(PCHUFLAGS) $(IFLAGS) $(INFLAG) $< $(COUTFLAG)$(INTDIR)/$@' ; \
+	fi
+	@"$(CXX)" $(CXXFLAGS) $(PCHUFLAGS) $(IFLAGS) $(INFLAG) $< $(COUTFLAG)$(INTDIR)/$@ || exit 1
 
 # Rule for Precompiled Header File
-$(TGTNAME).pch: $(TGTPCHSRC)
+$(TGTPCHNAME).pch: $(TGTPCHNAME).cpp
 	@if [ ! -d $(INTDIR) ] ; then \
 	  mkdir -p $(INTDIR) ; \
 	fi
-	@echo '"$(CXX)" $(CXXFLAGS) $(PCHCFLAGS) $(IFLAGS) $(INFLAG) $< $(OUTFLAG)$(INTDIR)'
-	@"$(CXX)" $(CXXFLAGS) $(PCHCFLAGS) $(IFLAGS) $(INFLAG) $< $(OUTFLAG)$(INTDIR)
+	@if [ $(VERBOSE). == yes. ] ; then \
+		echo '"$(CXX)" $(CXXFLAGS) $(PCHCFLAGS) $(IFLAGS) $(INFLAG) $< $(COUTFLAG)$(INTDIR)' ; \
+	fi
+	@"$(CXX)" $(CXXFLAGS) $(PCHCFLAGS) $(IFLAGS) $(INFLAG) $< $(COUTFLAG)$(INTDIR)/ || exit 1
 
 # Rule for building the resources
 %.res: %.rc
 	@if [ ! -d $(INTDIR) ] ; then \
 	  mkdir -p $(INTDIR) ; \
 	fi
-	@echo '"$(RC)" $(RCFLAGS) $(IFLAGS) -Fo$(INTDIR)$@ $<'
-	@"$(RC)" $(RCFLAGS) $(IFLAGS) -Fo$(INTDIR)/$@ $<
+	@if [ $(VERBOSE). == yes. ] ; then \
+		echo '"$(RC)" $(RCFLAGS) $(IFLAGS) $(COUTFLAG) $(INTDIR)/$@ $<' ; \
+	fi
+	@"$(RC)" $(RCFLAGS) $(IFLAGS) $(COUTFLAG) $(INTDIR)/$@ $< || exit 1
 
 # Rule for building MIDL files
-%.tlb %.h %_i.c %_p.c: %.idl
+#	generate 4 files: %.tlb, %.h, %_i.c and %_p.c 
+%.tlb: %.idl
 	@if [ ! -d $(INTDIR) ] ; then \
 	  mkdir -p $(INTDIR) ; \
 	fi
-	@echo '"$(MIDL)" $(MIDL_CFLAGS) $(MIDL_DFLAGS) $(IFLAGS) /out $(INTDIR) $<'
-	@"$(MIDL)" $(MIDL_CFLAGS) $(MIDL_DFLAGS) $(IFLAGS) /out $(INTDIR) $<
+	@if [ $(VERBOSE). == yes. ] ; then \
+		echo '"$(MIDL)" $(MIDL_CFLAGS) $(MIDL_DFLAGS) $(IFLAGS) /out $(INTDIR) $<' ; \
+	fi
+	@"$(MIDL)" $(MIDL_CFLAGS) $(MIDL_DFLAGS) $(IFLAGS) /out $(INTDIR) $< || exit 1
 
 #
 #  OUTPUT
 #
 
 # Rule for Output: Library
-$(TGTNAME).lib: $(PCHFILE) $(OBJS) $(RCOBJS)
-	@echo Generating library ...
-	@echo Succeed
+$(TGTNAME).lib: $(OBJS) $(RCOBJS)
+	@echo "> Linking ..."
+	@if [ ! -d $(OUTDIR) ] ; then \
+	  mkdir -p $(OUTDIR) ; \
+	fi
+	
+$(TGTNAME).a: $(OBJS) $(RCOBJS)
+	@echo "> Linking ..."
+	@if [ ! -d $(OUTDIR) ] ; then \
+	  mkdir -p $(OUTDIR) ; \
+	fi
 
 # Rule for Output: Dll
-$(TGTNAME).dll: $(PCHFILE) $(OBJS) $(RCOBJS)
-	@echo Generating DLL ...
-	@echo Succeed
+$(TGTNAME).dll: $(OBJS) $(RCOBJS)
+	@echo "> Linking ..."
+	@if [ ! -d $(OUTDIR) ] ; then \
+	  mkdir -p $(OUTDIR) ; \
+	fi
 	
-$(TGTNAME).so: $(PCHFILE) $(OBJS) $(RCOBJS)
-	@echo Generating SO ...
-	@echo Succeed
+$(TGTNAME).so: $(OBJS) $(RCOBJS)
+	@echo "> Linking ..."
+	@if [ ! -d $(OUTDIR) ] ; then \
+	  mkdir -p $(OUTDIR) ; \
+	fi
+	
+$(TGTNAME).dynlib: $(OBJS) $(RCOBJS)
+	@echo "> Linking ..."
+	@if [ ! $(XOS). == Mac. ]; then \
+	    echo 'error: Dynlib file is only for MacOS' ; \
+	    exit 1 ; \
+	fi
+	@if [ ! -d $(OUTDIR) ] ; then \
+	  mkdir -p $(OUTDIR) ; \
+	fi
 
-# Rule for Output: App
-$(TGTNAME).exe: $(PCHFILE) $(OBJS) $(RCOBJS)
-	@echo Generating EXE ...
-	@echo Succeed
+# Rule for Output: Executable
+$(TGTNAME).exe: $(OBJS) $(RCOBJS)
+	@echo "> Linking ..."
+	@if [ ! -d $(OUTDIR) ] ; then \
+	  mkdir -p $(OUTDIR) ; \
+	fi
+	@if [ $(VERBOSE). == yes. ] ; then \
+		echo '"$(LINK)" $(LFLAGS) $^ $(LOUTFLAG)"$(OUTDIR)/$(TGTNAME).exe" $(TGTLIBS)' ; \
+	fi
+	@"$(LINK)" $(LFLAGS) $(LOUTFLAG)"$(OUTDIR)/$(TGTNAME).exe" $^ $(PCHOBJ) $(TGTLIBS)
 	
-$(TGTNAME).app: $(PCHFILE) $(OBJS) $(RCOBJS)
-	@echo Generating APP ...
-	@echo Succeed
+$(TGTNAME): $(OBJS) $(RCOBJS)
+	@echo "> Linking ..."
+	@if [ ! -d $(OUTDIR) ] ; then \
+	  mkdir -p $(OUTDIR) ; \
+	fi
 
 # Rule for Output: Sys
-$(TGTNAME).sys: $(PCHFILE) $(OBJS) $(RCOBJS)
-	@echo Generating SYS ...
-	@echo Succeed
+$(TGTNAME).sys: $(OBJS) $(RCOBJS)
+	@echo "> Linking ..."
+	@if [ ! $(XOS). == Windows. ]; then \
+	    echo 'error: SYS file is only for Windows' ; \
+	    exit 1 ; \
+	fi
+	@if [ ! -d $(OUTDIR) ] ; then \
+	  mkdir -p $(OUTDIR) ; \
+	fi
 	
 .PHONY: printsrcs
 .PHONY: printobjs
@@ -261,9 +338,10 @@ printobjs:
 	@echo 'OBJs:'
 	@echo "  $(PCHFILE)"
 	@for f in $(OBJS) ; do echo "  $$f" ; done
+	@for f in $(RCOBJS) ; do echo "  $$f" ; done
 
 buildcheck:
-	@echo 'Build Parameters Check:'
+	@echo '> Initializing ...'
 	@if [ $(BUILDARCH). == . ]; then \
 	    echo 'error: BUILDARCH is not defined' ; \
 	    exit 1 ; \
@@ -273,8 +351,16 @@ buildcheck:
 	    exit 1 ; \
 	fi
 
-buildall: buildcheck printsrcs printobjs $(PCHFILE) $(OBJS)
-	@echo Build finished
+stageStart:
+	@echo " "
+	@echo "================== Building $(TGTNAME)$(TGTEXT) ($(BUILDTYPE)/$(BUILDARCH)) =================="
+	@echo "Start at `date "+%Y-%m-%d %H:%M:%S"`"
+
+stageCompiling:
+	@echo "> Compiling ..."
+
+buildall: stageStart buildcheck stageCompiling $(PCHFILE) $(TGTNAME)$(TGTEXT)
+	@echo "Build Succeed (Used: $(DURATION) seconds)"
 	
 buildclean:
 	@if [[ $(BUILDARCH). == . || $(BUILDTYPE). == . ]]; then \

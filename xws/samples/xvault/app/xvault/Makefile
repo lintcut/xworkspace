@@ -16,8 +16,10 @@ PKGROOT=../../../xvault
 #		Target Properties			#
 #-----------------------------------#
 
-# The name of target
+# The name/extension of target
 TGTNAME=xvault
+#    -> By default, leave target extension empty here, makefile will set it base on target type and platform
+TGTEXT=
 
 # The target platform: win32, linux, mac, ios, android
 TGTPLATFORM=
@@ -89,7 +91,7 @@ include $(XWSROOT)/xws/makefiles/xmake
 .DEFAULT_GOAL := all
 
 all: buildall
-	@echo Build $(OUTDIRNAME) was finished
+	@echo " "
 
 clean: buildclean
 	@echo Done
