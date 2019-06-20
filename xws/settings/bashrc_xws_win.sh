@@ -36,10 +36,12 @@ export XWS=`echo \`xwsGetRoot\``
 echo "  XWS Root Directory: $XWS"
 
 xwsGetJava64Dir(){
-    if [ -d "$dirProgramFiles64/Java" ]; then
-        echo "$dirProgramFiles64/Java"
-    else
-        echo ""
+    if [ -d "/c/Program Files (x86)" ]; then
+        if [ -d "$dirProgramFiles/Java" ]; then
+            echo "$dirProgramFiles/Java"
+        else
+            echo ""
+        fi
     fi
 }
 

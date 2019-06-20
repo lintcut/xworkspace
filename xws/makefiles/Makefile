@@ -10,14 +10,16 @@
 #	- name of package
 PKGENAME=
 #	- root path of package
-PKGEROOT=
+PKGROOT=
 
 #-----------------------------------#
 #		Target Properties			#
 #-----------------------------------#
 
-# The name of target
+# The name/extension of target
 TGTNAME=
+#    -> By default, leave target extension empty here, makefile will set it base on target type and platform
+TGTEXT=
 
 # The target platform: win32, linux, mac, ios, android
 TGTPLATFORM=
@@ -50,7 +52,7 @@ TGTMODE=
 # The thread mode of target: if not defined, use `mt` by default
 #	mt:		multi-thread
 #	md:		multi-thread, dll version
-THREADMODE=
+THREADMODE=mt
 
 # Sources
 #	- Dirs, all source files under this dir will be compiled automatically
@@ -65,27 +67,31 @@ TGTSRCDIRS=
 #	- Single files
 TGTSOURCES=
 
-# Include dirs
-TGTINCDIRS=include
-
+# Include/Library dirs
+TGTINCDIRS=
 TGTLIBDIRS=
+
+# Additional Libraries
+TGTLIBS=
 
 # Precompile file name (If it is empty, then no precompile header)
 #	Files: 		$(TGTPCHSRC)
 #	Generated:	$(TGTNAME).pch 
-TGTPCHSRC=
+TGTPCHNAME=
 
 # Warnings
 #	- Ignored
 WARNS_IGNORED=
-#	- Treat as error: yes/no
+#	- Treat as error: if empty, default to 'Treat All As Error'
 WARNS_AS_ERROR=
 
 # DON NOT CHANGE THIS LINE
-include $(XWS)/xws/makefiles/xmake
+include $(XWSROOT)/xws/makefiles/xmake
 
-all: $(TARGETS)
-	@echo Build was finished
+.DEFAULT_GOAL := all
 
-clean:
-	@echo Build was cleaned
+all: buildall
+	@echo " "
+
+clean: buildclean
+	@echo Done
