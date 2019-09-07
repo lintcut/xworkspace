@@ -1,5 +1,8 @@
-# Exclude everything 
+# Exclude everything
 /*
-
-# Except
-!/xws/
+!.gitignore
+!.gitattributes
+!README.md
+!LICENSE
+!xws/*
+!external/cpprestsdk/*
