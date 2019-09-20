@@ -1,0 +1,3 @@
+LIBRARY xvault
+EXPORTS
+    XVaultGetVersion    @1

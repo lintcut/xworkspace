@@ -3,16 +3,6 @@
 #######################################################
 
 #-----------------------------------#
-#		Target Package Info			#
-#-----------------------------------#
-
-# The package information that target belongs to
-#	- name of package
-PKGENAME=xvault
-#	- root path of package
-PKGROOT=../../../xvault
-
-#-----------------------------------#
 #		Target Properties			#
 #-----------------------------------#
 
@@ -75,7 +65,6 @@ TGTLIBDIRS=
 TGTLIBS=
 
 # Precompile file name (If it is empty, then no precompile header)
-#	Files: 		$(TGTPCHSRC)
 #	Generated:	$(TGTNAME).pch
 TGTPCHNAME=xpch
 
@@ -85,7 +74,9 @@ WARNS_IGNORED=
 #	- Treat as error: if empty, default to 'Treat All As Error'
 WARNS_AS_ERROR=
 
-# DON NOT CHANGE THIS LINE
+#######################################################
+### 		DON NOT CHANGE BELOW THIS LINE			###
+#######################################################
 include $(XWSROOT)/xws/makefiles/xmake.mak
 
 .DEFAULT_GOAL := all

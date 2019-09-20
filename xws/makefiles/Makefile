@@ -3,16 +3,6 @@
 #######################################################
 
 #-----------------------------------#
-#		Target Package Info			#
-#-----------------------------------#
-
-# The package information that target belongs to
-#	- name of package
-PKGENAME=
-#	- root path of package
-PKGROOT=
-
-#-----------------------------------#
 #		Target Properties			#
 #-----------------------------------#
 

@@ -95,7 +95,10 @@ TGTSRCDIRS:=$(foreach d, $(TGTSRCDIRS), $(shell find $(d) -maxdepth $(SEARCH_DEP
 SOURCES = $(foreach dir, $(TGTSRCDIRS), $(foreach pattern, c* asm s, $(wildcard $(dir)/*.$(pattern))))
 # 		- exclude precompile header source file
 ifneq (,$(TGTPCHNAME))
-    TGTPCHSRC := $(filter %$(TGTPCHNAME).cpp, $(SOURCES))
+    TGTPCHSRC:=$(filter %$(TGTPCHNAME).cpp, $(SOURCES))
+    ifeq ($(TGTPCHSRC),)
+        TGTPCHSRC:=$(filter %$(TGTPCHNAME).c, $(SOURCES))
+	endif
     ifeq ($(TGTPCHSRC),)
         $(error 'Precompiled source file not found $(TGTPCHSRC)')
 	endif
@@ -114,17 +117,19 @@ ifneq (,$(IDLS))
 endif
 # 5. DEF file (used by DLL)
 ifeq (dll,$(TGTTYPE))
-    DEFFILE = $(foreach dir, $(TGTSRCDIRS), $(wildcard $(dir)/*.def))
+    DEFFILE:=$(foreach dir, $(TGTSRCDIRS), $(wildcard $(dir)/*.def))
+    DEFFILE:=$(shell echo $(DEFFILE))
     ifneq (,$(DEFFILE))
         COUNT_OF_DEFFILES := $(words $(DEFFILE))
         ifneq (1, $(COUNT_OF_DEFFILES))
             $(error "xmake: Too many *.def files > $(DEFFILE)")
         endif
+		LFLAGS+=-DEF:$(DEFFILE)
     endif
 endif
 
 # Make sure VPATH include all source dirs
-VPATH := $(sort $(TGTSRCDIRS))
+#VPATH := $(sort $(TGTSRCDIRS))
 
 # Generate Obj files list
 #OBJS = $(foreach f, $(SOURCES), $(addsuffix .o,$(basename $(notdir $f))))   		<-- This line remove dir, but we want to keep dir in intermediate folder
@@ -295,8 +300,19 @@ $(TGTNAME).pch: $(TGTPCHSRC)
 # Rule for Output: Library
 $(TGTNAME).lib: $(OBJS) $(RCOBJS)
 	@echo "> Linking ..."
+	@if [ $(VERBOSE). == yes. ] ; then \
+		echo '"$(LIB)" $(SLFLAGS) $^ $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).lib" $(TGTLIBS)' ; \
+	fi
+	@"$(LIB)" $(SLFLAGS) $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).lib" $^ $(PCHOBJ) $(TGTLIBS)
 	@if [ ! -d $(OUTDIR) ] ; then \
 	  mkdir -p $(OUTDIR) ; \
+	fi
+	@mv -f "$(INTDIR)/$(TGTNAME).lib" "$(OUTDIR)/$(TGTNAME).lib"
+	@if [ ! $(PKGROOT). == . ] ; then \
+		if [ ! -d $(PKGROOT)/$(OUTDIR) ] ; then \
+			mkdir -p $(PKGROOT)/$(OUTDIR) ; \
+		fi ; \
+	  	cp -f "$(OUTDIR)/$(TGTNAME).exe" "$(PKGROOT)/$(OUTDIR)/$(TGTNAME).lib" ; \
 	fi
 
 $(TGTNAME).a: $(OBJS) $(RCOBJS)
@@ -308,8 +324,25 @@ $(TGTNAME).a: $(OBJS) $(RCOBJS)
 # Rule for Output: Dll
 $(TGTNAME).dll: $(OBJS) $(RCOBJS)
 	@echo "> Linking ..."
+	@if [ $(VERBOSE). == yes. ] ; then \
+		echo '"$(LINK)" $(LFLAGS) $^ $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).dll" $(TGTLIBS)' ; \
+	fi
+	@"$(LINK)" $(LFLAGS) $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).dll" $^ $(PCHOBJ) $(TGTLIBS)
 	@if [ ! -d $(OUTDIR) ] ; then \
 	  mkdir -p $(OUTDIR) ; \
+	fi
+	@mv -f "$(INTDIR)/$(TGTNAME).dll" "$(OUTDIR)/$(TGTNAME).dll"
+	@mv -f "$(INTDIR)/$(TGTNAME).lib" "$(OUTDIR)/$(TGTNAME).lib"
+	@if [ $(XOS). == Windows. ] ; then \
+	  	mv -f "$(INTDIR)/$(TGTNAME).pdb" "$(OUTDIR)/$(TGTNAME).pdb" ; \
+	fi
+	@if [ ! $(PKGROOT). == . ] ; then \
+		if [ ! -d $(PKGROOT)/$(OUTDIR) ] ; then \
+			mkdir -p $(PKGROOT)/$(OUTDIR) ; \
+		fi ; \
+	  	cp -f "$(OUTDIR)/$(TGTNAME).dll" "$(PKGROOT)/$(OUTDIR)/$(TGTNAME).dll" ; \
+	  	cp -f "$(OUTDIR)/$(TGTNAME).lib" "$(PKGROOT)/$(OUTDIR)/$(TGTNAME).lib" ; \
+	  	cp -f "$(OUTDIR)/$(TGTNAME).pdb" "$(PKGROOT)/$(OUTDIR)/$(TGTNAME).pdb" ; \
 	fi
 
 $(TGTNAME).so: $(OBJS) $(RCOBJS)
@@ -341,6 +374,13 @@ $(TGTNAME).exe: $(OBJS) $(RCOBJS)
 	@mv -f "$(INTDIR)/$(TGTNAME).exe" "$(OUTDIR)/$(TGTNAME).exe"
 	@if [ $(XOS). == Windows. ] ; then \
 	  	mv -f "$(INTDIR)/$(TGTNAME).pdb" "$(OUTDIR)/$(TGTNAME).pdb" ; \
+	fi
+	@if [ ! $(PKGROOT). == . ] ; then \
+		if [ ! -d $(PKGROOT)/$(OUTDIR) ] ; then \
+			mkdir -p $(PKGROOT)/$(OUTDIR) ; \
+		fi ; \
+	  	cp -f "$(OUTDIR)/$(TGTNAME).exe" "$(PKGROOT)/$(OUTDIR)/$(TGTNAME).exe" ; \
+	  	cp -f "$(OUTDIR)/$(TGTNAME).pdb" "$(PKGROOT)/$(OUTDIR)/$(TGTNAME).pdb" ; \
 	fi
 
 $(TGTNAME): $(OBJS) $(RCOBJS)

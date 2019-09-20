@@ -7,7 +7,7 @@
 #-----------------------------------#
 
 # The name/extension of target
-TGTNAME=xvaultmgr
+TGTNAME=xvault-static
 #    -> By default, leave target extension empty here, makefile will set it base on target type and platform
 TGTEXT=
 
@@ -32,7 +32,7 @@ TGTMINOSVER=
 #	dll:	dll
 #	lib:	library
 #	drv:	driver (*.sys on windows)
-TGTTYPE=console
+TGTTYPE=lib
 
 # The type of target: console-app, gui-app, kernel-app, kernel-dll
 #	user:	user mode

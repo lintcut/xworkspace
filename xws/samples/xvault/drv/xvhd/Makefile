@@ -71,8 +71,8 @@ TGTINCDIRS=include
 TGTLIBDIRS=
 
 # Precompile file name (If it is empty, then no precompile header)
-#	Files: 		$(TGTPRECOMPILENAME).cpp and $(TGTPRECOMPILENAME).h 
-#	Generated:	$(TGTPRECOMPILENAME).pch 
+#	Files: 		$(TGTPRECOMPILENAME).cpp and $(TGTPRECOMPILENAME).h
+#	Generated:	$(TGTPRECOMPILENAME).pch
 TGTPRECOMPILENAME=
 
 # Warnings
@@ -82,7 +82,7 @@ WARNS_IGNORED=
 WARNS_AS_ERROR=
 
 # DON NOT CHANGE THIS LINE
-include $(XWS)/xws/makefiles/xmake
+include $(XWS)/xws/makefiles/xmake.mak
 
 all: $(TARGETS)
 	@echo Build was finished

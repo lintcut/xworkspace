@@ -46,9 +46,9 @@ else ifeq ($(TGTTYPE),lib)
 else ifeq ($(TGTTYPE),dll)
     TGTEXT=.dll
     ifeq (kernel,$(TGTMODE))
-        TGTSUBSYS=WINDOWS
-    else
         TGTSUBSYS=NATIVE
+    else
+        TGTSUBSYS=WINDOWS
     endif
 else ifeq ($(TGTTYPE),drv)
     TGTEXT=.sys
@@ -146,7 +146,7 @@ PREFERED_WDKVER=
 ifneq (,$(PREFERED_WDKVER))
     PREFERED_WDKMAJORVER=$(shell echo $(PREFERED_WDKVER) | cut -d . -f 1)
     PREFERED_WDKDIR_INC=$(shell ls -F '$(dirProgramFiles86)/Windows Kits/$(PREFERED_WDKMAJORVER)/Include/$(PREFERED_WDKVER)/' 2> /dev/null | grep / | grep km | cut -d / -f 1)
-    ifneq (km,$(PREFERED_SDKDIR_INC))
+    ifneq (km,$(PREFERED_WDKDIR_INC))
         $(info ** WARNING - WDK $(PREFERED_SDKVER) is not installed, use latest version instead)
         PREFERED_WDKVER=$(XWDKVER)
         PREFERED_WDKINCDIR=$(XWDKINCDIR)
@@ -244,19 +244,22 @@ PVK2PFX=$(PREFERED_SDKBINDIR)/pvk2pfx.exe
 
 IFLAGS += $(foreach dir, $(TGTINCDIRS), $(addprefix -I, $(dir)))
 
-IFLAGS += -I"$(PREFERED_SDKINCDIR)/shared"
 ifeq ($(TGTMODE),kernel)
-    IFLAGS+=-I"$(PREFERED_SDKINCDIR)/km"
+    IFLAGS+=-I"$(PREFERED_WDKINCDIR)/shared"
+    IFLAGS+=-I"$(PREFERED_WDKINCDIR)/km"
+    IFLAGS+=-I"$(PREFERED_WDKINCDIR)/km/crt"
 else
+    IFLAGS += -I"$(PREFERED_SDKINCDIR)/shared"
     IFLAGS+=-I"$(PREFERED_SDKINCDIR)/um" \
 		    -I"$(PREFERED_SDKINCDIR)/ucrt" \
 		    -I"$(PREFERED_VSDIR)/VC/include"
 endif
 
 LFLAGS=-LIBPATH:"$(OUTDIR)" -LIBPATH:"$(INTDIR)"
+SLFLAGS=-LIBPATH:"$(OUTDIR)" -LIBPATH:"$(INTDIR)"
 LFLAGS += $(foreach dir, $(TGTLIBDIRS), $(addprefix -LIBPATH:, $(dir)))
 ifeq ($(TGTMODE),kernel)
-    LFLAGS += -LIBPATH:"$(PREFERED_SDKLIBDIR)/km/$(BUILDARCH)"
+    LFLAGS += -LIBPATH:"$(PREFERED_WDKLIBDIR)/km/$(BUILDARCH)"
 else
     ifeq ($(BUILDARCH), x64)
         LFLAGS += -LIBPATH:"$(PREFERED_VSDIR)/VC/lib/amd64" \
@@ -412,7 +415,7 @@ else
                 -Fd"$(INTDIR)/vc$(PREFERED_VSVERSHORT).pdb" -Fa"$(INTDIR)/"
     LFLAGS  += -NOLOGO -PROFILE -LTCG -DYNAMICBASE -NXCOMPAT -PDB:"$(INTDIR)/$(TGTNAME).pdb" -LTCG:incremental -TLBID:1 -SUBSYSTEM:$(TGTSUBSYS)$(TGTSUBSYSVER) \
                kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
-    SLFLAGS += -NOLOGO -LTCG
+    SLFLAGS += -NOLOGO -LTCG -SUBSYSTEM:WINDOWS
     ifeq ($(TGTTYPE),dll)
         CFLAGS   += -D_USRDLL -D_WINDLL
         CXXFLAGS += -D_USRDLL -D_WINDLL
@@ -434,6 +437,7 @@ endif
 
 printbuildtools:
 	@echo "[Visual Studio Tools]"
+	@echo "  Version:  $(PREFERED_VSVER)"
 	@echo "  CC:       $(CC)"
 	@echo "  CXX:      $(CXX)"
 	@echo "  LIB:      $(LIB)"
@@ -441,6 +445,9 @@ printbuildtools:
 	@echo "  DUMPBIN:  $(DUMPBIN)"
 	@echo "  NMAKE:    $(NMAKE)"
 	@echo "[SDK Tools]"
+	@echo "  SDK Ver:  $(PREFERED_SDKVER)"
+	@echo "  WDK Ver:  $(PREFERED_WDKVER)"
+	@echo "  Version:  $(PREFERED_VSVER)"
 	@echo "  RC:       $(RC)"
 	@echo "  MC:       $(MC)"
 	@echo "  MIDL:     $(MIDL)"

@@ -3,21 +3,13 @@
 #######################################################
 
 #-----------------------------------#
-#		Target Package Info			#
-#-----------------------------------#
-
-# The package information that target belongs to
-#	- name of package
-PKGENAME=
-#	- root path of package
-PKGEROOT=
-
-#-----------------------------------#
 #		Target Properties			#
 #-----------------------------------#
 
-# The name of target
-TGTNAME=
+# The name/extension of target
+TGTNAME=xvflt
+#    -> By default, leave target extension empty here, makefile will set it base on target type and platform
+TGTEXT=
 
 # The target platform: win32, linux, mac, ios, android
 TGTPLATFORM=
@@ -40,17 +32,17 @@ TGTMINOSVER=
 #	dll:	dll
 #	lib:	library
 #	drv:	driver (*.sys on windows)
-TGTTYPE=
+TGTTYPE=drv
 
 # The type of target: console-app, gui-app, kernel-app, kernel-dll
 #	user:	user mode
 #	kernel:	kernel mode
-TGTMODE=
+TGTMODE=kernel
 
 # The thread mode of target: if not defined, use `mt` by default
 #	mt:		multi-thread
 #	md:		multi-thread, dll version
-THREADMODE=
+THREADMODE=mt
 
 # Sources
 #	- Dirs, all source files under this dir will be compiled automatically
@@ -65,27 +57,30 @@ TGTSRCDIRS=src
 #	- Single files
 TGTSOURCES=
 
-# Include dirs
-TGTINCDIRS=include
-
+# Include/Library dirs
+TGTINCDIRS=inc src
 TGTLIBDIRS=
 
+# Additional Libraries
+TGTLIBS=
+
 # Precompile file name (If it is empty, then no precompile header)
-#	Files: 		$(TGTPRECOMPILENAME).cpp and $(TGTPRECOMPILENAME).h 
-#	Generated:	$(TGTPRECOMPILENAME).pch 
-TGTPRECOMPILENAME=
+#	Generated:	$(TGTNAME).pch
+TGTPCHNAME=xpch
 
 # Warnings
 #	- Ignored
 WARNS_IGNORED=
-#	- Treat as error: yes/no
+#	- Treat as error: if empty, default to 'Treat All As Error'
 WARNS_AS_ERROR=
 
 # DON NOT CHANGE THIS LINE
-include $(XWS)/xws/makefiles/xmake
+include $(XWSROOT)/xws/makefiles/xmake.mak
 
-all: $(TARGETS)
-	@echo Build was finished
+.DEFAULT_GOAL := all
 
-clean:
-	@echo Build was cleaned
+all: buildall
+	@echo " "
+
+clean: buildclean
+	@echo Done
