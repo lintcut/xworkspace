@@ -57,11 +57,11 @@ ifeq ($(XOS),)
 endif
 
 ifeq ($(XOS),Windows)
-    include $(XWS)/xws/makefiles/xmake.env.win
+    include $(XWS)/xws/makefiles/xmake.env.win.mak
 else ifeq ($(XOS),Mac)
-    include $(XWS)/xws/makefiles/xmake.env.mac
+    include $(XWS)/xws/makefiles/xmake.env.mac.mak
 else ifeq ($(XOS),Linux)
-    include $(XWS)/xws/makefiles/xmake.env.linux
+    include $(XWS)/xws/makefiles/xmake.env.linux.mak
 else
     $(error xmake: XOS ("$(XOS)") is unknown)
 endif
@@ -75,7 +75,7 @@ DURATION=$(shell echo $$(( $(CURSECONDS) - $(TMSTART) )))
 #-----------------------------------#
 
 OUTDIRNAME=$(TGTPLATFORM)_$(BUILDTYPE)_$(BUILDARCH)_$(THREADMODE)
-INTDIR=output/intermediate/$(OUTDIRNAME)
+INTDIR=output/intermediate/$(TGTNAME)/$(OUTDIRNAME)
 OUTDIR=output/$(OUTDIRNAME)
 
 
@@ -90,7 +90,6 @@ endif
 
 # 1. Prepare Source Dirs List
 TGTSRCDIRS:=$(foreach d, $(TGTSRCDIRS), $(shell find $(d) -maxdepth $(SEARCH_DEPTH) -type d | sed 's/^\.\///' | grep -v '^\..*'))
-# 2. Find pch source file
 # 2. Get c/cpp/cxx/asm files
 #		- enum files
 SOURCES = $(foreach dir, $(TGTSRCDIRS), $(foreach pattern, c* asm s, $(wildcard $(dir)/*.$(pattern))))
@@ -102,7 +101,7 @@ ifneq (,$(TGTPCHNAME))
 	endif
     SOURCES := $(filter-out $(TGTPCHSRC),$(SOURCES))
 else
-    
+
 endif
 # 2. Get resource file
 RESOURCES = $(foreach dir, $(TGTSRCDIRS), $(foreach pattern, rc, $(wildcard $(dir)/*.$(pattern))))
@@ -128,13 +127,15 @@ endif
 VPATH := $(sort $(TGTSRCDIRS))
 
 # Generate Obj files list
-OBJS = $(foreach f, $(SOURCES), $(addsuffix .o,$(basename $(notdir $f))))
+#OBJS = $(foreach f, $(SOURCES), $(addsuffix .o,$(basename $(notdir $f))))   		<-- This line remove dir, but we want to keep dir in intermediate folder
+OBJS = $(foreach f, $(SOURCES), $(addsuffix .o,$(basename $f)))
 ifneq (,$(TGTPCHNAME))
     PCHOBJ += $(TGTPCHNAME).o
 endif
 
 # Generate res files list
-RCOBJS = $(foreach f, $(RESOURCES), $(addsuffix .res,$(basename $(notdir $f))))
+#RCOBJS = $(foreach f, $(RESOURCES), $(addsuffix .res,$(basename $(notdir $f))))	<-- This line remove dir, but we want to keep dir in intermediate folder
+RCOBJS = $(foreach f, $(RESOURCES), $(addsuffix .res,$(basename $f)))
 
 #-----------------------------------#
 #				Includes			#
@@ -176,8 +177,14 @@ endif
 
 # Rule for building ASM files
 %.o: %.s
-	@if [ ! -d $(INTDIR) ] ; then \
-	  mkdir -p $(INTDIR) ; \
+	@if [ $(patsubst %/,%,$(dir $<)) == . ]; then \
+		if [ ! -d $(INTDIR) ] ; then \
+			mkdir -p $(INTDIR) ; \
+		fi \
+	else \
+		if [ ! -d $(INTDIR)/$(patsubst %/,%,$(dir $<)) ] ; then \
+			mkdir -p $(INTDIR)/$(patsubst %/,%,$(dir $<)) ; \
+		fi \
 	fi
 	@if [ $(VERBOSE). == yes. ] ; then \
 		echo '"$(ML)" $(MLFLAGS) $(COUTFLAG) $(INTDIR)/$@ $(INFLAG) $<' ; \
@@ -185,8 +192,14 @@ endif
 	@"$(ML)" $(MLFLAGS) $(COUTFLAG) $(INTDIR)/$@ $(INFLAG) $< || exit 1
 
 %.o: %.asm
-	@if [ ! -d $(INTDIR) ] ; then \
-	  mkdir -p $(INTDIR) ; \
+	@if [ $(patsubst %/,%,$(dir $<)) == . ]; then \
+		if [ ! -d $(INTDIR) ] ; then \
+			mkdir -p $(INTDIR) ; \
+		fi \
+	else \
+		if [ ! -d $(INTDIR)/$(patsubst %/,%,$(dir $<)) ] ; then \
+			mkdir -p $(INTDIR)/$(patsubst %/,%,$(dir $<)) ; \
+		fi \
 	fi
 	@if [ $(VERBOSE). == yes. ] ; then \
 		echo '"$(ML)" $(MLFLAGS) $(COUTFLAG) $(INTDIR)/$@ $(INFLAG) $<' ; \
@@ -195,8 +208,14 @@ endif
 
 # Rule for building C files
 %.o: %.c
-	@if [ ! -d $(INTDIR) ] ; then \
-	  mkdir -p $(INTDIR) ; \
+	@if [ $(patsubst %/,%,$(dir $<)) == . ]; then \
+		if [ ! -d $(INTDIR) ] ; then \
+			mkdir -p $(INTDIR) ; \
+		fi \
+	else \
+		if [ ! -d $(INTDIR)/$(patsubst %/,%,$(dir $<)) ] ; then \
+			mkdir -p $(INTDIR)/$(patsubst %/,%,$(dir $<)) ; \
+		fi \
 	fi
 	@if [ $(VERBOSE). == yes. ] ; then \
 		echo '"$(CC)" $(CFLAGS) $(IFLAGS) $(INFLAG) $< $(COUTFLAG)$(INTDIR)/$@' ; \
@@ -206,18 +225,30 @@ endif
 
 # Rule for building C++ files
 %.o: %.cpp
-	@if [ ! -d $(INTDIR) ] ; then \
-	  mkdir -p $(INTDIR) ; \
+	@if [ $(patsubst %/,%,$(dir $<)) == . ]; then \
+		if [ ! -d $(INTDIR) ] ; then \
+			mkdir -p $(INTDIR) ; \
+		fi \
+	else \
+		if [ ! -d $(INTDIR)/$(patsubst %/,%,$(dir $<)) ] ; then \
+			mkdir -p $(INTDIR)/$(patsubst %/,%,$(dir $<)) ; \
+		fi \
 	fi
 	@if [ $(VERBOSE). == yes. ] ; then \
 		echo '"$(CXX)" $(CXXFLAGS) $(PCHUFLAGS) $(IFLAGS) $(INFLAG) $< $(COUTFLAG)$(INTDIR)/$@' ; \
 	fi
 	@"$(CXX)" $(CXXFLAGS) $(PCHUFLAGS) $(IFLAGS) $(INFLAG) $< $(COUTFLAG)$(INTDIR)/$@ || exit 1
 
-# Rule for Precompiled Header File
-$(TGTPCHNAME).pch: $(TGTPCHNAME).cpp
-	@if [ ! -d $(INTDIR) ] ; then \
-	  mkdir -p $(INTDIR) ; \
+# Rule for Precompiled Header File  // $(TGTPCHNAME).cpp
+$(TGTNAME).pch: $(TGTPCHSRC)
+	@if [ $(patsubst %/,%,$(dir $<)) == . ]; then \
+		if [ ! -d $(INTDIR) ] ; then \
+			mkdir -p $(INTDIR) ; \
+		fi \
+	else \
+		if [ ! -d $(INTDIR)/$(patsubst %/,%,$(dir $<)) ] ; then \
+			mkdir -p $(INTDIR)/$(patsubst %/,%,$(dir $<)) ; \
+		fi \
 	fi
 	@if [ $(VERBOSE). == yes. ] ; then \
 		echo '"$(CXX)" $(CXXFLAGS) $(PCHCFLAGS) $(IFLAGS) $(INFLAG) $< $(COUTFLAG)$(INTDIR)' ; \
@@ -226,8 +257,14 @@ $(TGTPCHNAME).pch: $(TGTPCHNAME).cpp
 
 # Rule for building the resources
 %.res: %.rc
-	@if [ ! -d $(INTDIR) ] ; then \
-	  mkdir -p $(INTDIR) ; \
+	@if [ $(patsubst %/,%,$(dir $<)) == . ]; then \
+		if [ ! -d $(INTDIR) ] ; then \
+			mkdir -p $(INTDIR) ; \
+		fi \
+	else \
+		if [ ! -d $(INTDIR)/$(patsubst %/,%,$(dir $<)) ] ; then \
+			mkdir -p $(INTDIR)/$(patsubst %/,%,$(dir $<)) ; \
+		fi \
 	fi
 	@if [ $(VERBOSE). == yes. ] ; then \
 		echo '"$(RC)" $(RCFLAGS) $(IFLAGS) $(COUTFLAG) $(INTDIR)/$@ $<' ; \
@@ -235,10 +272,16 @@ $(TGTPCHNAME).pch: $(TGTPCHNAME).cpp
 	@"$(RC)" $(RCFLAGS) $(IFLAGS) $(COUTFLAG) $(INTDIR)/$@ $< || exit 1
 
 # Rule for building MIDL files
-#	generate 4 files: %.tlb, %.h, %_i.c and %_p.c 
+#	generate 4 files: %.tlb, %.h, %_i.c and %_p.c
 %.tlb: %.idl
-	@if [ ! -d $(INTDIR) ] ; then \
-	  mkdir -p $(INTDIR) ; \
+	@if [ $(patsubst %/,%,$(dir $<)) == . ]; then \
+		if [ ! -d $(INTDIR) ] ; then \
+			mkdir -p $(INTDIR) ; \
+		fi \
+	else \
+		if [ ! -d $(INTDIR)/$(patsubst %/,%,$(dir $<)) ] ; then \
+			mkdir -p $(INTDIR)/$(patsubst %/,%,$(dir $<)) ; \
+		fi \
 	fi
 	@if [ $(VERBOSE). == yes. ] ; then \
 		echo '"$(MIDL)" $(MIDL_CFLAGS) $(MIDL_DFLAGS) $(IFLAGS) /out $(INTDIR) $<' ; \
@@ -255,7 +298,7 @@ $(TGTNAME).lib: $(OBJS) $(RCOBJS)
 	@if [ ! -d $(OUTDIR) ] ; then \
 	  mkdir -p $(OUTDIR) ; \
 	fi
-	
+
 $(TGTNAME).a: $(OBJS) $(RCOBJS)
 	@echo "> Linking ..."
 	@if [ ! -d $(OUTDIR) ] ; then \
@@ -268,13 +311,13 @@ $(TGTNAME).dll: $(OBJS) $(RCOBJS)
 	@if [ ! -d $(OUTDIR) ] ; then \
 	  mkdir -p $(OUTDIR) ; \
 	fi
-	
+
 $(TGTNAME).so: $(OBJS) $(RCOBJS)
 	@echo "> Linking ..."
 	@if [ ! -d $(OUTDIR) ] ; then \
 	  mkdir -p $(OUTDIR) ; \
 	fi
-	
+
 $(TGTNAME).dynlib: $(OBJS) $(RCOBJS)
 	@echo "> Linking ..."
 	@if [ ! $(XOS). == Mac. ]; then \
@@ -299,7 +342,7 @@ $(TGTNAME).exe: $(OBJS) $(RCOBJS)
 	@if [ $(XOS). == Windows. ] ; then \
 	  	mv -f "$(INTDIR)/$(TGTNAME).pdb" "$(OUTDIR)/$(TGTNAME).pdb" ; \
 	fi
-	
+
 $(TGTNAME): $(OBJS) $(RCOBJS)
 	@echo "> Linking ..."
 	@if [ ! -d $(OUTDIR) ] ; then \
@@ -316,7 +359,7 @@ $(TGTNAME).sys: $(OBJS) $(RCOBJS)
 	@if [ ! -d $(OUTDIR) ] ; then \
 	  mkdir -p $(OUTDIR) ; \
 	fi
-	
+
 .PHONY: printsrcs
 .PHONY: printobjs
 
@@ -365,7 +408,7 @@ stageCompiling:
 
 buildall: stageStart buildcheck stageCompiling $(PCHFILE) $(TGTNAME)$(TGTEXT)
 	@echo "Build Succeed (Used: $(DURATION) seconds)"
-	
+
 buildclean:
 	@if [[ $(BUILDARCH). == . || $(BUILDTYPE). == . ]]; then \
 	    echo 'Clean all' ; \

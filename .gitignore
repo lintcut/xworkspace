@@ -4,5 +4,6 @@
 !.gitattributes
 !README.md
 !LICENSE
-!xws/*
-!external/cpprestsdk/*
+!xws/
+!external/cpprestsdk/
+!external/yara/

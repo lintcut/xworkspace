@@ -76,7 +76,7 @@ TGTLIBS=
 
 # Precompile file name (If it is empty, then no precompile header)
 #	Files: 		$(TGTPCHSRC)
-#	Generated:	$(TGTNAME).pch 
+#	Generated:	$(TGTNAME).pch
 TGTPCHNAME=xpch
 
 # Warnings
@@ -86,7 +86,7 @@ WARNS_IGNORED=
 WARNS_AS_ERROR=
 
 # DON NOT CHANGE THIS LINE
-include $(XWSROOT)/xws/makefiles/xmake
+include $(XWSROOT)/xws/makefiles/xmake.mak
 
 .DEFAULT_GOAL := all
 

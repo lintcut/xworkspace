@@ -420,7 +420,7 @@ else
 endif
 
 ifneq ($(TGTPCHNAME),)
-    PCHFILE=$(TGTPCHNAME).pch
+    PCHFILE=$(TGTNAME).pch
     PCHCFLAGS = -Yc"$(TGTPCHNAME).h" -Fp"$(INTDIR)/$(PCHFILE)"
     PCHUFLAGS = -Yu"$(TGTPCHNAME).h" -Fp"$(INTDIR)/$(PCHFILE)"
 endif
