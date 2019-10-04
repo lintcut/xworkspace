@@ -242,7 +242,8 @@ PVK2PFX=$(PREFERED_SDKBINDIR)/pvk2pfx.exe
 #		Path: Includes, Libs		#
 #-----------------------------------#
 
-IFLAGS += $(foreach dir, $(TGTINCDIRS), $(addprefix -I, $(dir)))
+#IFLAGS += $(foreach dir, $(TGTINCDIRS), $(addprefix -I, $(dir)))
+IFLAGS += $(foreach dir, $(TGTINCDIRS), $(addprefix -I, $(shell echo '$(dir)' | sed 's/\\\\/\\//'g)))
 
 ifeq ($(TGTMODE),kernel)
     IFLAGS+=-I"$(PREFERED_WDKINCDIR)/shared"
@@ -257,7 +258,8 @@ endif
 
 LFLAGS=-LIBPATH:"$(OUTDIR)" -LIBPATH:"$(INTDIR)"
 SLFLAGS=-LIBPATH:"$(OUTDIR)" -LIBPATH:"$(INTDIR)"
-LFLAGS += $(foreach dir, $(TGTLIBDIRS), $(addprefix -LIBPATH:, $(dir)))
+#LFLAGS += $(foreach dir, $(TGTLIBDIRS), $(addprefix -LIBPATH:, $(dir)))
+LFLAGS += $(foreach dir, $(TGTLIBDIRS), $(addprefix -LIBPATH:,$(shell echo '$(dir)' | sed 's/\\\\/\\//'g)))
 ifeq ($(TGTMODE),kernel)
     LFLAGS += -LIBPATH:"$(PREFERED_WDKLIBDIR)/km/$(BUILDARCH)"
 else
@@ -407,10 +409,10 @@ ifeq ($(TARGETMODE), kernel)
     endif
 else
 	# Windows User Mode Module
-    CFLAGS   += -EHa -nologo -Zi -W3 -MP -GS -analyze -GL -FAcs -Gd -Zc:wchar_t -Zc:inline -fp:precise -errorReport:prompt -DUNICODE -D_UNICODE \
+    CFLAGS   += -EHa -nologo -Zi -W3 -MP -GS -GL -FAcs -Gd -Zc:wchar_t -Zc:inline -fp:precise -errorReport:prompt -DUNICODE -D_UNICODE \
 	            -DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x$(TGTMINOSVER) -DWINVER=0x$(TGTMINOSVER) -DWINNT=1 -DNTDDI_VERSION=0x$(TGTMINOSVER)0000 \
                 -Fd"$(INTDIR)/vc$(PREFERED_VSVERSHORT).pdb" -Fa"$(INTDIR)/"
-    CXXFLAGS += -EHa -nologo -Zi -W3 -MP -GS -analyze -GL -FAcs -Gd -Zc:wchar_t -Zc:inline -fp:precise -errorReport:prompt -DUNICODE -D_UNICODE \
+    CXXFLAGS += -EHa -nologo -Zi -W3 -MP -GS -GL -FAcs -Gd -Zc:wchar_t -Zc:inline -fp:precise -errorReport:prompt -DUNICODE -D_UNICODE \
 	            -DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x$(TGTMINOSVER) -DWINVER=0x$(TGTMINOSVER) -DWINNT=1 -DNTDDI_VERSION=0x$(TGTMINOSVER)0000 \
                 -Fd"$(INTDIR)/vc$(PREFERED_VSVERSHORT).pdb" -Fa"$(INTDIR)/"
     LFLAGS  += -NOLOGO -PROFILE -LTCG -DYNAMICBASE -NXCOMPAT -PDB:"$(INTDIR)/$(TGTNAME).pdb" -LTCG:incremental -TLBID:1 -SUBSYSTEM:$(TGTSUBSYS)$(TGTSUBSYSVER) \

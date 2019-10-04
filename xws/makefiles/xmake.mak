@@ -325,9 +325,9 @@ $(TGTNAME).a: $(OBJS) $(RCOBJS)
 $(TGTNAME).dll: $(OBJS) $(RCOBJS)
 	@echo "> Linking ..."
 	@if [ $(VERBOSE). == yes. ] ; then \
-		echo '"$(LINK)" $(LFLAGS) $^ $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).dll" $(TGTLIBS)' ; \
+		echo '"$(LINK)" $(LFLAGS) $^ $(PCHOBJ) $(TGTLIBS) $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).dll"' ; \
 	fi
-	@"$(LINK)" $(LFLAGS) $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).dll" $^ $(PCHOBJ) $(TGTLIBS)
+	@"$(LINK)" $(LFLAGS) $^ $(TGTLIBS) $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).dll"
 	@if [ ! -d $(OUTDIR) ] ; then \
 	  mkdir -p $(OUTDIR) ; \
 	fi
@@ -365,9 +365,9 @@ $(TGTNAME).dynlib: $(OBJS) $(RCOBJS)
 $(TGTNAME).exe: $(OBJS) $(RCOBJS)
 	@echo "> Linking ..."
 	@if [ $(VERBOSE). == yes. ] ; then \
-		echo '"$(LINK)" $(LFLAGS) $^ $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).exe" $(TGTLIBS)' ; \
+		echo '"$(LINK)" $(LFLAGS) $(TGTLIBS) $^ $(PCHOBJ) $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).exe"' ; \
 	fi
-	@"$(LINK)" $(LFLAGS) $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).exe" $^ $(PCHOBJ) $(TGTLIBS)
+	@"$(LINK)" $(LFLAGS) $(TGTLIBS) $^ $(PCHOBJ) $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).exe"
 	@if [ ! -d $(OUTDIR) ] ; then \
 	  mkdir -p $(OUTDIR) ; \
 	fi
