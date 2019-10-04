@@ -342,6 +342,11 @@ ifeq ($(TGTTYPE),dll)
     endif
 endif
 
+ifneq ($(TGTDEFINES),)
+    CFLAGS += $(addprefix -D, $(TGTDEFINES))
+    CXXFLAGS += $(addprefix -D, $(TGTDEFINES))
+endif
+
 # Warning flags
 ifeq ($(WARNS_AS_ERROR),all)
     CFLAGS += -WX

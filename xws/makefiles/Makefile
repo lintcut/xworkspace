@@ -57,9 +57,12 @@ TGTSRCDIRS=
 #	- Single files
 TGTSOURCES=
 
+# Extra Processor Defines
+TGTDEFINES=BOOST_AUTO_LINK_TAGGED
+
 # Include/Library dirs
-TGTINCDIRS=
-TGTLIBDIRS=
+TGTINCDIRS=$(BOOST_DIR)/include
+TGTLIBDIRS=$(BOOST_DIR)/libs/win_$(BUILDARCH)_$(BUILDTYPE)
 
 # Additional Libraries
 TGTLIBS=
