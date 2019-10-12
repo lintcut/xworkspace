@@ -89,10 +89,12 @@ ifeq (,$(TGTSRCDIRS))
 endif
 
 # 1. Prepare Source Dirs List
-TGTSRCDIRS:=$(foreach d, $(TGTSRCDIRS), $(shell find $(d) -maxdepth $(SEARCH_DEPTH) -type d | sed 's/^\.\///' | grep -v '^\..*'))
+TGTSRCDIRS:=$(foreach d, $(TGTSRCDIRS), $(shell find $(d) -maxdepth $(SEARCH_DEPTH) -type d | sed 's/^\.\///' | grep -v '^\..*' | grep -v '^output\/*'))
+$(info TGTSRCDIRS = $(TGTSRCDIRS))
 # 2. Get c/cpp/cxx/asm files
 #		- enum files
 SOURCES = $(foreach dir, $(TGTSRCDIRS), $(foreach pattern, c* asm s, $(wildcard $(dir)/*.$(pattern))))
+SOURCES += $(TGTSOURCES)
 # 		- exclude precompile header source file
 ifneq (,$(TGTPCHNAME))
     TGTPCHSRC:=$(filter %$(TGTPCHNAME).cpp, $(SOURCES))
