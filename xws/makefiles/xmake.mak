@@ -73,8 +73,8 @@ DURATION=$(shell echo $$(( $(CURSECONDS) - $(TMSTART) )))
 #-----------------------------------#
 #		Names and Paths				#
 #-----------------------------------#
-
-OUTDIRNAME=$(TGTPLATFORM)_$(BUILDTYPE)_$(BUILDARCH)_$(THREADMODE)
+#_$(THREADMODE)
+OUTDIRNAME=$(TGTPLATFORM)_$(BUILDTYPE)_$(BUILDARCH)
 INTDIR=output/intermediate/$(TGTNAME)/$(OUTDIRNAME)
 OUTDIR=output/$(OUTDIRNAME)
 
@@ -89,7 +89,7 @@ ifeq (,$(TGTSRCDIRS))
 endif
 
 # 1. Prepare Source Dirs List
-TGTSRCDIRS:=$(foreach d, $(TGTSRCDIRS), $(shell find $(d) -maxdepth $(SEARCH_DEPTH) -type d | sed 's/^\.\///' | grep -v '^\..*' | grep -v '^output\/*'))
+TGTSRCDIRS:=. $(foreach d, $(TGTSRCDIRS), $(shell find $(d) -maxdepth $(SEARCH_DEPTH) -type d | sed 's/^\.\///' | grep -v '^\..*' | grep -v '^output\/*'))
 $(info TGTSRCDIRS = $(TGTSRCDIRS))
 # 2. Get c/cpp/cxx/asm files
 #		- enum files
@@ -327,9 +327,9 @@ $(TGTNAME).a: $(OBJS) $(RCOBJS)
 $(TGTNAME).dll: $(OBJS) $(RCOBJS)
 	@echo "> Linking ..."
 	@if [ $(VERBOSE). == yes. ] ; then \
-		echo '"$(LINK)" $(LFLAGS) $^ $(PCHOBJ) $(TGTLIBS) $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).dll"' ; \
+		echo '"$(LINK)" $(LFLAGS) $(PCHOBJ) $^ $(TGTLIBS) $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).dll"' ; \
 	fi
-	@"$(LINK)" $(LFLAGS) $^ $(TGTLIBS) $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).dll"
+	@"$(LINK)" $(LFLAGS) $(PCHOBJ) $^ $(TGTLIBS) $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).dll"
 	@if [ ! -d $(OUTDIR) ] ; then \
 	  mkdir -p $(OUTDIR) ; \
 	fi
@@ -367,9 +367,9 @@ $(TGTNAME).dynlib: $(OBJS) $(RCOBJS)
 $(TGTNAME).exe: $(OBJS) $(RCOBJS)
 	@echo "> Linking ..."
 	@if [ $(VERBOSE). == yes. ] ; then \
-		echo '"$(LINK)" $(LFLAGS) $(TGTLIBS) $^ $(PCHOBJ) $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).exe"' ; \
+		echo '"$(LINK)" $(LFLAGS) $(TGTLIBS) $(PCHOBJ) $^ $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).exe"' ; \
 	fi
-	@"$(LINK)" $(LFLAGS) $(TGTLIBS) $^ $(PCHOBJ) $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).exe"
+	@"$(LINK)" $(LFLAGS) $(TGTLIBS) $(PCHOBJ) $^ $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).exe"
 	@if [ ! -d $(OUTDIR) ] ; then \
 	  mkdir -p $(OUTDIR) ; \
 	fi
