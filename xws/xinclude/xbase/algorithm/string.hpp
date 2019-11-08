@@ -95,4 +95,32 @@ std::wstring format<wchar_t>(const wchar_t* fmt, ...)
     return result.data();
 }
 
+enum FormatAlignment {
+    Left = 0,
+    Center,
+    Right
+};
+
+template <typename T, typename... Args>
+std::basic_string<T> format_fixed_width(size_t width, FormatAlignment align, const T* fmt, Args... args)
+{
+    std::basic_string<T> s = format(fmt, args...);
+    if (s.length() >= width)
+        return s;
+    if (align == Center) {
+        size_t left = (width - s.length()) / 2;
+        size_t right = width - s.length() - left;
+        if (left)
+            s = std::basic_string<T>(left,  T(' ')) + s;
+        if (right)
+            s += std::basic_string<T>(right,  T(' '));
+
+    } else if (align == Right) {
+        s = std::basic_string<T>(width - s.length(),  T(' ')) + s;
+    } else { // Left
+        s += std::basic_string<T>(width - s.length(),  T(' '));
+    }
+    return s;
+}
+
 }}

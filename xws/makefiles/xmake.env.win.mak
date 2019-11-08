@@ -253,7 +253,8 @@ else
     IFLAGS += -I"$(PREFERED_SDKINCDIR)/shared"
     IFLAGS+=-I"$(PREFERED_SDKINCDIR)/um" \
 		    -I"$(PREFERED_SDKINCDIR)/ucrt" \
-		    -I"$(PREFERED_VSDIR)/VC/include"
+		    -I"$(PREFERED_VSDIR)/VC/include" \
+            -I"$(XWSROOT)/xinclude"
 endif
 
 LFLAGS=-LIBPATH:"$(OUTDIR)" -LIBPATH:"$(INTDIR)"
