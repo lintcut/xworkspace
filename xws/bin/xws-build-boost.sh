@@ -3,7 +3,7 @@
 source xws-base.sh
 
 xwsGetBoostVersion(){
-    allVersions=`curl --silent --get http://www.boost.org/users/history/ | grep -Po 'Version \K[\.0123456789]*'`
+    allVersions=`curl --silent --get https://www.boost.org/users/history/ | grep -Po 'Version \K[\.0123456789]*'`
     if [ "$1" == "" ]; then
         arr=($allVersions)
         echo ${arr[0]}
@@ -82,35 +82,35 @@ cd $TARGET_BOOST_DIR
 # build boostrap
 echo ""
 echo "Build boost static library (Release/x64):"
-../../../workspace.settings/bin/xws-build-boost-cmd.bat 14.0 64 release static
+../../../xws/bin/xws-build-boost-cmd.bat 16.4 64 release static
 
 echo ""
 echo "Build boost static library (Release/x86):"
-../../../workspace.settings/bin/xws-build-boost-cmd.bat 14.0 32 release static
+../../../xws/bin/xws-build-boost-cmd.bat 16.4 32 release static
 
 echo ""
 echo "Build boost static library (Debug/x64):"
-../../../workspace.settings/bin/xws-build-boost-cmd.bat 14.0 64 debug static
+../../../xws/bin/xws-build-boost-cmd.bat 16.4 64 debug static
 
 echo ""
 echo "Build boost static library (Debug/x86):"
-../../../workspace.settings/bin/xws-build-boost-cmd.bat 14.0 32 debug static
+../../../xws/bin/xws-build-boost-cmd.bat 16.4 32 debug static
 
 echo ""
 echo "Build boost DLL (Release/x64):"
-../../../workspace.settings/bin/xws-build-boost-cmd.bat 14.0 64 release shared
+../../../xws/bin/xws-build-boost-cmd.bat 16.4 64 release shared
 
 echo ""
 echo "Build boost DLL (Release/x86):"
-../../../workspace.settings/bin/xws-build-boost-cmd.bat 14.0 32 release shared
+../../../xws/bin/xws-build-boost-cmd.bat 16.4 32 release shared
 
 echo ""
 echo "Build boost DLL (Debug/x64):"
-../../../workspace.settings/bin/xws-build-boost-cmd.bat 14.0 64 debug shared
+../../../xws/bin/xws-build-boost-cmd.bat 16.4 64 debug shared
 
 echo ""
 echo "Build boost DLL (Debug/x86):"
-../../../workspace.settings/bin/xws-build-boost-cmd.bat 14.0 32 debug shared
+../../../xws/bin/xws-build-boost-cmd.bat 16.4 32 debug shared
 
 echo ""
 echo "Install ..."
@@ -121,28 +121,28 @@ fi
 cp -r boost ../../../external/boost/$TARGET_BOOST_VERSION2/include/
 
 echo "    - Release/x64"
-if [ ! -d "../../../external/boost/$TARGET_BOOST_VERSION2/libs/release_x64" ]; then
-    mkdir -p ../../../external/boost/$TARGET_BOOST_VERSION2/libs/release_x64
+if [ ! -d "../../../external/boost/$TARGET_BOOST_VERSION2/libs/win_release_x64" ]; then
+    mkdir -p ../../../external/boost/$TARGET_BOOST_VERSION2/libs/win_release_x64
 fi
-cp build.msvc/release_64/staged/lib/*.* ../../../external/boost/$TARGET_BOOST_VERSION2/libs/release_x64/
+cp build.msvc/release_x64/staged/lib/*.* ../../../external/boost/$TARGET_BOOST_VERSION2/libs/win_release_x64/
 
 echo "    - Release/x86"
-if [ ! -d "../../../external/boost/$TARGET_BOOST_VERSION2/libs/release_x86" ]; then
-    mkdir -p ../../../external/boost/$TARGET_BOOST_VERSION2/libs/release_x86
+if [ ! -d "../../../external/boost/$TARGET_BOOST_VERSION2/libs/win_release_x86" ]; then
+    mkdir -p ../../../external/boost/$TARGET_BOOST_VERSION2/libs/win_release_x86
 fi
-cp build.msvc/release_32/staged/lib/*.* ../../../external/boost/$TARGET_BOOST_VERSION2/libs/release_x86/
+cp build.msvc/release_x86/staged/lib/*.* ../../../external/boost/$TARGET_BOOST_VERSION2/libs/win_release_x86/
 
 echo "    - Debug/x64"
-if [ ! -d "../../../external/boost/$TARGET_BOOST_VERSION2/libs/debug_x64" ]; then
-    mkdir -p ../../../external/boost/$TARGET_BOOST_VERSION2/libs/debug_x64
+if [ ! -d "../../../external/boost/$TARGET_BOOST_VERSION2/libs/win_debug_x64" ]; then
+    mkdir -p ../../../external/boost/$TARGET_BOOST_VERSION2/libs/win_debug_x64
 fi
-cp build.msvc/debug_64/staged/lib/*.* ../../../external/boost/$TARGET_BOOST_VERSION2/libs/debug_x64/
+cp build.msvc/debug_x64/staged/lib/*.* ../../../external/boost/$TARGET_BOOST_VERSION2/libs/win_debug_x64/
 
 echo "    - Debug/x86"
-if [ ! -d "../../../external/boost/$TARGET_BOOST_VERSION2/libs/debug_x86" ]; then
-    mkdir -p ../../../external/boost/$TARGET_BOOST_VERSION2/libs/debug_x86
+if [ ! -d "../../../external/boost/$TARGET_BOOST_VERSION2/libs/win_debug_x86" ]; then
+    mkdir -p ../../../external/boost/$TARGET_BOOST_VERSION2/libs/win_debug_x86
 fi
-cp build.msvc/debug_32/staged/lib/*.* ../../../external/boost/$TARGET_BOOST_VERSION2/libs/debug_x86/
+cp build.msvc/debug_x86/staged/lib/*.* ../../../external/boost/$TARGET_BOOST_VERSION2/libs/win_debug_x86/
 
 cd $CURDIR
 echo ""

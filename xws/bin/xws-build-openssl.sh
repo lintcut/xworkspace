@@ -1,5 +1,7 @@
 #!/usr/bin/bash
 
+source xws-base.sh
+
 # xwsGetOpenSSLOldGroups($1)
 # $1 - optional, version group of openssl (e.g. '0.9.x', '1.0.2', '1.1.0').
 #      use empty string to get latest version group.
@@ -38,7 +40,7 @@ xwsGetOpenSSLOldVersionDownloadFileName(){
 #      use empty string to get latest version.
 # Return: a valid download file name of version if call succeeds, empty otherwise
 xwsGetOpenSSLDownlaodFileName(){
-    allVersions=`curl --silent --get http://openssl.skazkaforyou.com/source/ | grep 'openssl-' | grep -Po 'href="\K[^"]*' | grep '.tar.gz$' | grep -v 'fips' | grep -v 'pre' | sort -r`
+    allVersions=`curl --silent --get https://www.openssl.org/source/ | grep 'openssl-' | grep -Po 'href="\K[^"]*' | grep '.tar.gz$' | grep -v 'fips' | grep -v 'pre' | sort -r`
     if [ "$1" == "" ]; then
         arr=($allVersions)
         echo ${arr[0]}
@@ -94,7 +96,7 @@ xwsBuildOpenSSL(){
 #===============================================================================
 
 TARGET_OPENSSL_FILE=`xwsGetOpenSSLDownlaodFileName`
-TARGET_OPENSSL_URL=http://openssl.skazkaforyou.com/source/$TARGET_OPENSSL_FILE
+TARGET_OPENSSL_URL=https://www.openssl.org/source/$TARGET_OPENSSL_FILE
 TARGET_OPENSSL_VERSION=`echo $TARGET_OPENSSL_FILE | sed 's/openssl-//' | sed 's/\.tar\.gz//'`
 TARGET_OPENSSL_VERSION2=`echo $TARGET_OPENSSL_VERSION | sed 's/\./_/'g`
 TARGET_OPENSSL_DIR=`echo $TARGET_OPENSSL_FILE | sed 's/\.tar\.gz//'`
@@ -112,6 +114,7 @@ if [ ! -d temp/openssl ]; then
 fi
 cd temp/openssl
 
+BUILDDIR=`xwsGetCurrentDir`
 # download boost source code
 if [ ! -f $TARGET_OPENSSL_FILE ]; then
     echo "Download OpenSSL ..."
@@ -119,11 +122,91 @@ if [ ! -f $TARGET_OPENSSL_FILE ]; then
 fi
 
 # unpack zip file
-if [ ! -d $TARGET_OPENSSL_DIR ]; then
-    echo "Unzip openssl ..."
-    xwsUnpackOpenSSL $TARGET_OPENSSL_FILE
+#if [ ! -d $TARGET_OPENSSL_DIR ]; then
+#    echo "Unzip openssl ..."
+#    xwsUnpackOpenSSL $TARGET_OPENSSL_FILE
+#    echo "openssl is extracted into $TARGET_OPENSSL_DIR"
+#fi
+
+#cd $CURDIR
+echo ""
+echo "Build openssl static library (Release/x64):"
+rm -rf $TARGET_OPENSSL_DIR
+xwsUnpackOpenSSL $TARGET_OPENSSL_FILE
+cd $TARGET_OPENSSL_DIR
+../../../xws/bin/xws-build-openssl-cmd.bat 16.4 64 release
+if [ ! -d "../../../external/openssl/$TARGET_OPENSSL_VERSION2/include" ]; then
+    mkdir -p ../../../external/openssl/$TARGET_OPENSSL_VERSION2/include
 fi
+cp -r include/* ../../../external/openssl/$TARGET_OPENSSL_VERSION2/include/
+if [ ! -d "../../../external/openssl/$TARGET_OPENSSL_VERSION2/libs/win_release_x64" ]; then
+    mkdir -p ../../../external/openssl/$TARGET_OPENSSL_VERSION2/libs/win_release_x64
+fi
+if [ ! -d "../../../external/openssl/$TARGET_OPENSSL_VERSION2/bin/win_release_x64" ]; then
+    mkdir -p ../../../external/openssl/$TARGET_OPENSSL_VERSION2/bin/win_release_x64
+fi
+cp *.lib ../../../external/openssl/$TARGET_OPENSSL_VERSION2/libs/win_release_x64/
+cp *.pdb ../../../external/openssl/$TARGET_OPENSSL_VERSION2/libs/win_release_x64/
+cp apps/*.lib ../../../external/openssl/$TARGET_OPENSSL_VERSION2/libs/win_release_x64/
+cp apps/*.exe ../../../external/openssl/$TARGET_OPENSSL_VERSION2/bin/win_release_x64/
+cp apps/*.pdb ../../../external/openssl/$TARGET_OPENSSL_VERSION2/bin/win_release_x64/
+cd $BUILDDIR
 
-cd $CURDIR
+#echo ""
+#echo "Build openssl static library (Release/x86):"
+#rm -rf $TARGET_OPENSSL_DIR
+#xwsUnpackOpenSSL $TARGET_OPENSSL_FILE
+#cd $TARGET_OPENSSL_DIR
+#../../../xws/bin/xws-build-openssl-cmd.bat 16.4 32 release
+#if [ ! -d "../../../external/openssl/$TARGET_OPENSSL_VERSION2/libs/win_release_x86" ]; then
+#    mkdir -p ../../../external/boost/$TARGET_OPENSSL_VERSION2/libs/win_release_x86
+#fi
+#if [ ! -d "../../../external/openssl/$TARGET_OPENSSL_VERSION2/bin/win_release_x86" ]; then
+#    mkdir -p ../../../external/openssl/$TARGET_OPENSSL_VERSION2/bin/win_release_x86
+#fi
+#cp *.lib ../../../external/openssl/$TARGET_OPENSSL_VERSION2/libs/win_release_x86/
+#cp *.pdb ../../../external/openssl/$TARGET_OPENSSL_VERSION2/libs/win_release_x86/
+#cp apps/*.lib ../../../external/openssl/$TARGET_OPENSSL_VERSION2/libs/win_release_x86/
+#cp apps/*.exe ../../../external/openssl/$TARGET_OPENSSL_VERSION2/bin/win_release_x86/
+#cp apps/*.pdb ../../../external/openssl/$TARGET_OPENSSL_VERSION2/bin/win_release_x86/
+#cd $BUILDDIR
+#
+#echo ""
+#echo "Build openssl static library (Debug/x64):"
+#rm -rf $TARGET_OPENSSL_DIR
+#xwsUnpackOpenSSL $TARGET_OPENSSL_FILE
+#cd $TARGET_OPENSSL_DIR
+#../../../xws/bin/xws-build-openssl-cmd.bat 16.4 64 debug
+#if [ ! -d "../../../external/openssl/$TARGET_OPENSSL_VERSION2/libs/win_debug_x64" ]; then
+#    mkdir -p ../../../external/openssl/$TARGET_OPENSSL_VERSION2/libs/win_debug_x64
+#fi
+#if [ ! -d "../../../external/openssl/$TARGET_OPENSSL_VERSION2/bin/win_debug_x64" ]; then
+#    mkdir -p ../../../external/openssl/$TARGET_OPENSSL_VERSION2/bin/win_debug_x64
+#fi
+#cp *.lib ../../../external/openssl/$TARGET_OPENSSL_VERSION2/libs/win_debug_x64/
+#cp *.pdb ../../../external/openssl/$TARGET_OPENSSL_VERSION2/libs/win_debug_x64/
+#cp apps/*.lib ../../../external/openssl/$TARGET_OPENSSL_VERSION2/libs/win_debug_x64/
+#cp apps/*.exe ../../../external/openssl/$TARGET_OPENSSL_VERSION2/bin/win_debug_x64/
+#cp apps/*.pdb ../../../external/openssl/$TARGET_OPENSSL_VERSION2/bin/win_debug_x64/
+#cd $BUILDDIR
+#
+#echo ""
+#echo "Build openssl static library (Debug/x86):"
+#rm -rf $TARGET_OPENSSL_DIR
+#xwsUnpackOpenSSL $TARGET_OPENSSL_FILE
+#cd $TARGET_OPENSSL_DIR
+#../../../xws/bin/xws-build-openssl-cmd.bat 16.4 32 debug
+#if [ ! -d "../../../external/openssl/$TARGET_OPENSSL_VERSION2/libs/win_debug_x86" ]; then
+#    mkdir -p ../../../external/openssl/$TARGET_OPENSSL_VERSION2/libs/win_debug_x86
+#fi
+#if [ ! -d "../../../external/openssl/$TARGET_OPENSSL_VERSION2/bin/win_debug_x86" ]; then
+#    mkdir -p ../../../external/openssl/$TARGET_OPENSSL_VERSION2/bin/win_debug_x86
+#fi
+#cp *.lib ../../../external/openssl/$TARGET_OPENSSL_VERSION2/libs/win_debug_x86/
+#cp *.pdb ../../../external/openssl/$TARGET_OPENSSL_VERSION2/libs/win_debug_x86/
+#cp apps/*.lib ../../../external/openssl/$TARGET_OPENSSL_VERSION2/libs/win_debug_x86/
+#cp apps/*.exe ../../../external/openssl/$TARGET_OPENSSL_VERSION2/bin/win_debug_x86/
+#cp apps/*.pdb ../../../external/openssl/$TARGET_OPENSSL_VERSION2/bin/win_debug_x86/
+#cd $BUILDDIR
 
-echo "OpenSSL has been downloaded"
+echo "OpenSSL has been built successfully"

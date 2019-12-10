@@ -1,5 +1,5 @@
 ###############################################################
-######  		WINDOWS BUILD ENVIRONMENT				#######
+######  	  	    LINUX BUILD ENVIRONMENT				#######
 ###############################################################
 
 ifeq ($(XWSROOT),)
@@ -28,3 +28,12 @@ else ifeq ($(TGTTYPE),drv)
 else
     $(error xmake: TGTTYPE ("$(TGTTYPE)") is unknown)
 endif
+
+# Tools
+CC=gcc
+CXX=g++
+LIB=ar
+LINK=ld
+
+LFLAGS=-L$(OUTDIR) -L$(INTDIR)
+SLFLAGS=-L$(OUTDIR) -L$(INTDIR)

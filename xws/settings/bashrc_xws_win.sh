@@ -133,6 +133,166 @@ xwsGetVisualStudioVersion(){
     fi
 }
 
+xwsGetVisualStudioVersionNew(){
+    version=`"$dirProgramFiles86/Microsoft Visual Studio/Installer/vswhere.exe" | grep catalog_productDisplayVersion | cut -d ' ' -f 2`
+    echo $version
+}
+
+xwsGetVisualStudioDirNew(){
+    #windir=`"$dirProgramFiles86/Microsoft Visual Studio/Installer/vswhere.exe" | grep installationPath | sed 's/installationPath: //' | sed 's/://'`
+    if [ -f "$dirProgramFiles86/Microsoft Visual Studio/Installer/vswhere.exe" ]; then
+        windir=`"$dirProgramFiles86/Microsoft Visual Studio/Installer/vswhere.exe" -property installationPath | sed 's/://'`
+        dir="/${windir//\\//}"
+    fi
+    echo $dir
+}
+
+# xwsGetVisualStudioRootDir(vsver)
+#   - vsver: vs2015, vs2017 and vs2019
+xwsGetVisualStudioRootDir(){
+    #windir=`"$dirProgramFiles86/Microsoft Visual Studio/Installer/vswhere.exe" | grep installationPath | sed 's/installationPath: //' | sed 's/://'`
+    if [ $1. == vs2015. ]; then
+        if [ -f "$dirProgramFiles86/Microsoft Visual Studio 14.0/VC/bin/cl.exe" ]; then
+            dir=`echo "$dirProgramFiles86/Microsoft Visual Studio 14.0" | sed 's/://'`
+        fi
+    elif [ $1. == vs2017. ]; then
+        if [ -f "$dirProgramFiles86/Microsoft Visual Studio/Installer/vswhere.exe" ]; then
+            windir=`"$dirProgramFiles86/Microsoft Visual Studio/Installer/vswhere.exe" -version "[15.0,16.0)" -property installationPath | sed 's/://'`
+            if [ "$windir" != "" ]; then
+                dir="/${windir//\\//}"
+            fi
+        fi
+    elif [ $1. == vs2019. ]; then
+        if [ -f "$dirProgramFiles86/Microsoft Visual Studio/Installer/vswhere.exe" ]; then
+            windir=`"$dirProgramFiles86/Microsoft Visual Studio/Installer/vswhere.exe" -version "[16.0,17.0)" -property installationPath | sed 's/://'`
+            if [ "$windir" != "" ]; then
+                dir="/${windir//\\//}"
+            fi
+        fi
+    else
+        if [ -f "$dirProgramFiles86/Microsoft Visual Studio/Installer/vswhere.exe" ]; then
+            windir=`"$dirProgramFiles86/Microsoft Visual Studio/Installer/vswhere.exe" -property installationPath | sed 's/://'`
+            if [ "$windir" != "" ]; then
+                dir="/${windir//\\//}"
+            fi
+        fi
+    fi
+    echo $dir
+}
+
+# xwsGetVisualStudioToolsDir(vsver, root)
+#   - vsver: vs2015, vs2017 and vs2019
+xwsGetVisualStudioToolsDir(){
+    #windir=`"$dirProgramFiles86/Microsoft Visual Studio/Installer/vswhere.exe" | grep installationPath | sed 's/installationPath: //' | sed 's/://'`
+    if [ $1. == . ]; then
+        exit
+    fi
+    if [ ! -d "$2" ]; then
+        exit
+    fi
+    if [ $1. == vs2015. ]; then
+        echo $2/VC
+    elif [ $1. == vs2017. ]; then
+        toolsets=`ls "$2/VC/Tools/MSVC" | sort -r`
+        arrtoolsets=($toolsets)
+        if [ ${arrtoolsets[0]}. != . ]; then
+            dir="$2/VC/Tools/MSVC/${arrtoolsets[0]}"
+        fi
+    elif [ $1. == vs2019. ]; then
+        toolsets=`ls "$2/VC/Tools/MSVC" | sort -r`
+        arrtoolsets=($toolsets)
+        if [ ${arrtoolsets[0]}. != . ]; then
+            dir="$2/VC/Tools/MSVC/${arrtoolsets[0]}"
+        fi
+    else
+        toolsets=`ls "$2/VC/Tools/MSVC" | sort -r`
+        arrtoolsets=($toolsets)
+        if [ ${arrtoolsets[0]}. != . ]; then
+            dir="$2/VC/Tools/MSVC/${arrtoolsets[0]}"
+        fi
+    fi
+    echo $dir
+}
+
+# xwsGetVisualStudioToolsBinDir(vsver, arch, toolsdir)
+#   - vsver: vs2015, vs2017 and vs2019
+#   - arch:  x86, x64
+xwsGetVisualStudioToolsBinDir(){
+    #windir=`"$dirProgramFiles86/Microsoft Visual Studio/Installer/vswhere.exe" | grep installationPath | sed 's/installationPath: //' | sed 's/://'`
+    if [ $1. == . ]; then
+        exit
+    fi
+    if [ ! -d "$3" ]; then
+        exit
+    fi
+    if [ $1. == vs2015. ]; then
+        if [ "$dirProgramFiles86" == "$dirProgramFiles" ]; then
+            # OS is 32 bits
+            if [ $2. == x64. ]; then
+                echo $3/bin/x86_amd64
+            else
+                echo $3/bin
+            fi
+        else
+            # OS is 64 bits
+            if [ $2. == x64. ]; then
+                echo $3/bin/amd64
+            else
+                echo $3/bin
+            fi
+        fi
+    elif [ $1. == vs2017. ]; then
+        if [ "$dirProgramFiles86" == "$dirProgramFiles" ]; then
+            # OS is 32 bits
+            if [ $2. == x64. ]; then
+                dir="$3/bin/Hostx86/x64"
+            else
+                dir="$3/bin/Hostx86/x86"
+            fi
+        else
+            # OS is 64 bits
+            if [ $2. == x64. ]; then
+                dir="$3/bin/Hostx64/x64"
+            else
+                dir="$3/bin/Hostx64/x86"
+            fi
+        fi
+    elif [ $1. == vs2019. ]; then
+        if [ "$dirProgramFiles86" == "$dirProgramFiles" ]; then
+            # OS is 32 bits
+            if [ $2. == x64. ]; then
+                dir="$3/bin/Hostx86/x64"
+            else
+                dir="$3/bin/Hostx86/x86"
+            fi
+        else
+            # OS is 64 bits
+            if [ $2. == x64. ]; then
+                dir="$3/bin/Hostx64/x64"
+            else
+                dir="$3/bin/Hostx64/x86"
+            fi
+        fi
+    else
+        if [ "$dirProgramFiles86" == "$dirProgramFiles" ]; then
+            # OS is 32 bits
+            if [ $2. == x64. ]; then
+                dir="$3/bin/Hostx86/x64"
+            else
+                dir="$3/bin/Hostx86/x86"
+            fi
+        else
+            # OS is 64 bits
+            if [ $2. == x64. ]; then
+                dir="$3/bin/Hostx64/x64"
+            else
+                dir="$3/bin/Hostx64/x86"
+            fi
+        fi
+    fi
+    echo $dir
+}
+
 # get windows SDK version list
 xwsGetWinSdkVersions(){
     dirProgramFiles86=`echo \`xwsGetProgramFiles86\``
@@ -248,10 +408,84 @@ if [ ! -z "$XJDKHOME" ]; then
 	export PATH=$PATH:"$XJDKHOME/bin"
 fi
 
-export XVSVER=`echo \`xwsGetNewestVisualStudioVersion\``
-if [ -d "$dirProgramFiles86/Microsoft Visual Studio $XVSVER" ]; then
-    export XVSDIR="$dirProgramFiles86/Microsoft Visual Studio $XVSVER"
+# Check Visual Studio 2015
+export XVS2015DIR=`echo \`xwsGetVisualStudioRootDir vs2015\``
+if [ "$XVS2015DIR" == "" ]; then
+    echo "[VS2015]"
+    echo "  - Not Found"
+else
+    export XVS2015TOOLSDIR=`echo \`xwsGetVisualStudioToolsDir vs2015 "$XVS2015DIR"\``
+    export XVS2015TOOLSBIN32DIR=`echo \`xwsGetVisualStudioToolsBinDir vs2015 x86 "$XVS2015TOOLSDIR"\``
+    export XVS2015TOOLSBIN64DIR=`echo \`xwsGetVisualStudioToolsBinDir vs2015 x64 "$XVS2015TOOLSDIR"\``
+    echo "[VS2015]"
+    echo "  - Root:     $XVS2015DIR"
+    echo "  - Toolset:  $XVS2015TOOLSDIR"
+    echo "  - ToolsX86: $XVS2015TOOLSBIN32DIR"
+    echo "  - ToolsX64: $XVS2015TOOLSBIN64DIR"
+    export XVSVER="140"
+    export XVSDIR="$XVS2015DIR"
+    export XVSTOOLSDIR="$XVS2015TOOLSDIR"
+    export XVSTOOLSBIN32DIR="$XVS2015TOOLSBIN32DIR"
+    export XVSTOOLSBIN64DIR="$XVS2015TOOLSBIN64DIR"
 fi
+
+# Check Visual Studio 2017
+export XVS2017DIR=`echo \`xwsGetVisualStudioRootDir vs2017\``
+if [ "$XVS2017DIR" == "" ]; then
+    echo "[VS2017]"
+    echo "  - Not Found"
+else
+    export XVS2017TOOLSDIR=`echo \`xwsGetVisualStudioToolsDir vs2017 "$XVS2017DIR"\``
+    export XVS2017TOOLSBIN32DIR=`echo \`xwsGetVisualStudioToolsBinDir vs2017 x86 "$XVS2017TOOLSDIR"\``
+    export XVS2017TOOLSBIN64DIR=`echo \`xwsGetVisualStudioToolsBinDir vs2017 x64 "$XVS2017TOOLSDIR"\``
+    if [ -f "$XVS2017DIR/VC/Tools/Llvm/bin/clang.exe" ]; then
+        export XVSLLVM2017DIR="$XVS2017DIR/VC/Tools/Llvm"
+    fi
+    echo "[VS2017]"
+    echo "  - Root:      $XVS2017DIR"
+    echo "  - Toolset:   $XVS2017TOOLSDIR"
+    echo "  - ToolsX86:  $XVS2017TOOLSBIN32DIR"
+    echo "  - ToolsX64:  $XVS2017TOOLSBIN64DIR"
+    echo "  - ToolsLlvm: $XVSLLVM2017DIR"
+    export XVSVER="150"
+    export XVSDIR="$XVS2017DIR"
+    export XVSTOOLSDIR="$XVS2017TOOLSDIR"
+    export XVSTOOLSBIN32DIR="$XVS2017TOOLSBIN32DIR"
+    export XVSTOOLSBIN64DIR="$XVS2017TOOLSBIN64DIR"
+    export XVSLLVMDIR="$XVSLLVM2017DIR"
+fi
+
+# Check Visual Studio 2019
+export XVS2019DIR=`echo \`xwsGetVisualStudioRootDir vs2019\``
+if [ "$XVS2019DIR" == "" ]; then
+    echo "[VS2019]"
+    echo "  - Not Found"
+else
+    export XVS2019TOOLSDIR=`echo \`xwsGetVisualStudioToolsDir vs2019 "$XVS2019DIR"\``
+    export XVS2019TOOLSBIN32DIR=`echo \`xwsGetVisualStudioToolsBinDir vs2019 x86 "$XVS2019TOOLSDIR"\``
+    export XVS2019TOOLSBIN64DIR=`echo \`xwsGetVisualStudioToolsBinDir vs2019 x64 "$XVS2019TOOLSDIR"\``
+    if [ -f "$XVS2019DIR/VC/Tools/Llvm/bin/clang.exe" ]; then
+        export XVSLLVM2019DIR="$XVS2019DIR/VC/Tools/Llvm"
+    fi
+    echo "[VS2019]"
+    echo "  - Root:      $XVS2019DIR"
+    echo "  - Toolset:   $XVS2019TOOLSDIR"
+    echo "  - ToolsX86:  $XVS2019TOOLSBIN32DIR"
+    echo "  - ToolsX64:  $XVS2019TOOLSBIN64DIR"
+    echo "  - ToolsLlvm: $XVSLLVM2019DIR"
+    export XVSVER="160"
+    export XVSDIR="$XVS2019DIR"
+    export XVSTOOLSDIR="$XVS2019TOOLSDIR"
+    export XVSTOOLSBIN32DIR="$XVS2019TOOLSBIN32DIR"
+    export XVSTOOLSBIN64DIR="$XVS2019TOOLSBIN64DIR"
+    export XVSLLVMDIR="$XVSLLVM2019DIR"
+fi
+
+echo "[Default Visual Studio]"
+echo "  - Root:      $XVSDIR"
+echo "  - ToolsX86:  $XVSTOOLS32DIR"
+echo "  - ToolsX64:  $XVSTOOLS64DIR"
+echo "  - ToolsLlvm: $XVSLLVMDIR"
 
 export XSDKVER=`echo \`xwsGetNewestWinSdkVersion\``
 if [ $XSDKVER. == . ]; then
@@ -285,21 +519,24 @@ else
     fi
 fi
 
-echo "  Visual Studio Version: $XVSVER"
-echo "  Visual Studio Dir: $XVSDIR"
-echo "  Windows SDK Version: $XSDKVER"
-echo "  Windows SDK Version Major: $XSDKVERMAJOR"
-echo "  Windows SDK Include: $XSDKINCDIR"
-echo "  Windows SDK Lib: $XSDKLIBDIR"
-echo "  Windows WDK Version: $XWDKVER"
-echo "  Windows WDK Version Major: $XWDKVERMAJOR"
-echo "  Windows WDK Include: $XWDKINCDIR"
-echo "  Windows WDK Lib: $XWDKLIBDIR"
-echo "  JDK (32 bits): $XJDK32DIR"
-echo "  JDK (64 bits): $XJDK64DIR"
-echo "  JRE (32 bits): $XJRE32DIR"
-echo "  JRE (64 bits): $XJRE64DIR"
-echo "  JDKHOME:       $XJDKHOME"
+echo "[Default SDK]"
+echo "  - Version: $XSDKVER"
+echo "  - Include: $XSDKINCDIR"
+echo "  - Libs:    $XSDKLIBDIR"
+
+echo "[Default WDK]"
+echo "  - Version: $XWDKVER"
+echo "  - Include: $XWDKINCDIR"
+echo "  - Libs:    $XWDKLIBDIR"
+
+echo "[JDK]"
+echo "  - home: $XJDKHOME"
+echo "  - x86:  $XJDK32DIR"
+echo "  - x64:  $XJDK64DIR"
+
+echo "[JRE]"
+echo "  - x86: $XJRE32DIR"
+echo "  - x64: $XJRE64DIR"
 
 ##
 ##  Alias

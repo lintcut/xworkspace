@@ -57,11 +57,11 @@ ifeq ($(XOS),)
 endif
 
 ifeq ($(XOS),Windows)
-    include $(XWS)/xws/makefiles/xmake.env.win.mak
+    include $(XWSROOT)/xws/makefiles/xmake.env.win.mak
 else ifeq ($(XOS),Mac)
-    include $(XWS)/xws/makefiles/xmake.env.mac.mak
+    include $(XWSROOT)/xws/makefiles/xmake.env.mac.mak
 else ifeq ($(XOS),Linux)
-    include $(XWS)/xws/makefiles/xmake.env.linux.mak
+    include $(XWSROOT)/xws/makefiles/xmake.env.linux.mak
 else
     $(error xmake: XOS ("$(XOS)") is unknown)
 endif

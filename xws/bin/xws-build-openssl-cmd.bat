@@ -2,15 +2,31 @@
 
 REM $1 = Visual Studio Version
 set vsVer=%1
-set vsBat="C:/Program Files (x86)/Microsoft Visual Studio %vsVer%/VC/bin/vcvars32.bat"
 set PLATFORM=%2
 set CONFIGURATION=%3
-set LINKTYPE=%4
 
-if %2 == 64 (
-    set PLATFORM=64
+if %1 == 14.0 (
+    set vsBat="C:/Program Files (x86)/Microsoft Visual Studio %vsVer%/VC/bin/vcvars32.bat"
 ) else (
-    set PLATFORM=32
+    if %2 == 64 (
+        FOR /F "tokens=* USEBACKQ" %%g IN (`"C:/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe" -latest -property installationPath`) DO (SET vsBat="%%g\VC\Auxiliary\Build\vcvars64.bat")
+    ) else (
+        FOR /F "tokens=* USEBACKQ" %%g IN (`"C:/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe" -latest -property installationPath`) DO (SET vsBat="%%g\VC\Auxiliary\Build\vcvars32.bat")
+    )
+)
+
+if %2 == 32 (
+    if %3 == debug (
+        set VCFLAG=VC-WIN32
+    ) else (
+        set VCFLAG=debug-VC-WIN32
+    )
+) else (
+    if %3 == debug (
+        set VCFLAG=VC-WIN64A
+    ) else (
+        set VCFLAG=debug-VC-WIN64A
+    )
 )
 
 if %3 == debug (
@@ -19,24 +35,19 @@ if %3 == debug (
     set CONFIGURATION=release
 )
 
-if %4 == shared (
-    set LINKTYPE=shared
-) else (
-    set LINKTYPE=static
-)
-
 echo Run %vsBat% ...
 call %vsBat%
 
 echo "  TargetPlatform:  %PLATFORM%"
 echo "  Configuration:   %CONFIGURATION%"
-echo "  LinkType:        %LINKTYPE%"
-echo "  BuildDir:        build.msvc/%CONFIGURATION%_%PLATFORM%"
-echo "  StagedDir:       build.msvc/%CONFIGURATION%_%PLATFORM%/staged"
-echo "  BuildLog:        build.msvc/build-%CONFIGURATION%-%PLATFORM%-%LINKTYPE%.log"
+echo "  BuildLog:        build.msvc/build-%CONFIGURATION%-%PLATFORM%.log"
 
-set CurDir=%cd% 
-perl Configure VC-WIN32 no-shared --prefix="%CurDir%\build.msvc\debug_32"
-ms\do_ms
-nmake.exe -f ms\nt.mak 
-nmake.exe -f ms\nt.mak install
+set CurDir=%cd%
+perl Configure %VCFLAG% no-shared --prefix="%CurDir%\build.msvc\win_%CONFIGURATION%_%PLATFORM%"
+REM ### For 1.0.xx ###
+REM ms\do_ms
+REM nmake.exe -f ms\nt.mak
+REM nmake.exe -f ms\nt.mak install
+
+REM ### For 1.1.xx ###
+nmake.exe

@@ -23,14 +23,30 @@ ifeq ($(dirProgramFiles86),)
 endif
 
 ifeq ($(XVSVER),)
+    $(error Visual Studio version is not defined, run $(XWSROOT)/xws/settings/vashrc_xws_win.sh first)
+endif
+
+ifeq ($(XVSDIR),)
+    $(error Visual Studio is not found)
+endif
+
+ifeq ($(XVSDIR),)
     $(error Visual Studio is not found)
 endif
 
 ifeq ($(XSDKVER),)
+    $(error Windows SDK version is not defined, run $(XWSROOT)/xws/settings/vashrc_xws_win.sh first)
+endif
+
+ifeq ($(XSDKDIR),)
     $(error SDK is not found)
 endif
 
 ifeq ($(XWDKVER),)
+    $(error Windows WDK version is not defined, run $(XWSROOT)/xws/settings/vashrc_xws_win.sh first)
+endif
+
+ifeq ($(XWDKDIR),)
     $(info WDK is not found)
 endif
 
@@ -71,35 +87,58 @@ endif
 #-----------------------------------#
 
 # Prefered Visual Studio Version
-#	- 14.0 (Visual Studio 2015)
-#	- 15.0 (Visual Studio 2017)
-#	- 16.0 (Visual Studio 2019)
+#	- 140 (Visual Studio 2015)
+#	- 150 (Visual Studio 2017)
+#	- 160 (Visual Studio 2019)
 
-PREFERED_VSVER=
-
-ifneq (,$(PREFERED_VSVER))
-    PREFERED_VSDIR=$(shell ls -F '$(dirProgramFiles86)/' | grep / | grep 'Microsoft Visual Studio $(PREFERED_VSVER)' | cut -d / -f 1)
-    ifeq (,$(PREFERED_VSDIR))
-        $(info ** WARNING - Visual Studio $(PREFERED_VSVER) is not installed, use latest version instead)
-        PREFERED_VSVER=$(XVSVER)
-        PREFERED_VSDIR=$(XVSDIR)
-	else
-        CLEXE=$(shell ls -F '$(dirProgramFiles86)/Microsoft Visual Studio $(PREFERED_VSVER)/VC/bin/' 2> /dev/null | grep 'cl.exe')
-        ifneq (cl.exe,$(CLEXE))
-            $(info ** WARNING - Visual Studio $(PREFERED_VSVER) is not installed, use latest version instead)
-            PREFERED_VSVER=$(XVSVER)
-            PREFERED_VSDIR=$(XVSDIR)
-		else
-            PREFERED_VSDIR=$(dirProgramFiles86)/Microsoft Visual Studio $(PREFERED_VSVER)
-		endif
+ifeq ($(PREFERED_VSVER),)
+    PREFERED_VSVER=160
+endif
+ifeq ($(PREFERED_VSVER),140)
+    ifeq ($(XVS2015DIR),)
+        $(error Visual Studio 2015 is not found)
+    else
+        PREFERED_TOOLSET_VER=140
+        PREFERED_VSDIR=$(XVS2015DIR)
+        PREFERED_VSTOOLSDIR=$(XVS2015TOOLSDIR)
+        ifeq ($(BUILDARCH),x86)
+            PREFERED_VSTOOLSBINDIR=$(XVS2015TOOLSBIN32DIR)
+        else
+            PREFERED_VSTOOLSBINDIR=$(XVS2015TOOLSBIN64DIR)
+        endif
+    endif
+else ifeq ($(PREFERED_VSVER),150)
+    ifeq ($(XVS2017DIR),)
+        $(error Visual Studio 2017 is not found)
+    else
+        PREFERED_TOOLSET_VER=141
+        PREFERED_VSDIR=$(XVS2017DIR)
+        PREFERED_VSTOOLSDIR=$(XVS2017TOOLSDIR)
+        ifeq ($(BUILDARCH),x86)
+            PREFERED_VSTOOLSBINDIR=$(XVS2017TOOLSBIN32DIR)
+        else
+            PREFERED_VSTOOLSBINDIR=$(XVS2017TOOLSBIN64DIR)
+        endif
+    endif
+else ifeq ($(PREFERED_VSVER),160)
+    ifeq ($(XVS2019DIR),)
+        $(error Visual Studio 2019 is not found)
+    else
+        PREFERED_TOOLSET_VER=142
+        PREFERED_VSDIR=$(XVS2019DIR)
+        PREFERED_VSTOOLSDIR=$(XVS2019TOOLSDIR)
+        ifeq ($(BUILDARCH),x86)
+            PREFERED_VSTOOLSBINDIR=$(XVS2019TOOLSBIN32DIR)
+        else
+            PREFERED_VSTOOLSBINDIR=$(XVS2019TOOLSBIN64DIR)
+        endif
     endif
 else
-    PREFERED_VSVER=$(XVSVER)
-    PREFERED_VSDIR=$(XVSDIR)
+    $(error PREFERED_VSVER '$(PREFERED_VSVER)' is not found)
 endif
-PREFERED_VSVERSHORT=$(shell echo $(PREFERED_VSVER) | sed 's/\.//')
 
 # Prefered SDK Version
+#	- 10.0.18362.0
 #	- 10.0.17134.0
 #	- 10.0.15063.0
 #	- 10.0.14393.0
@@ -107,7 +146,7 @@ PREFERED_VSVERSHORT=$(shell echo $(PREFERED_VSVER) | sed 's/\.//')
 #	- 10.0.10240.0
 #	- 10.0.10150.0
 
-PREFERED_SDKVER=
+#PREFERED_SDKVER=
 
 ifneq (,$(PREFERED_SDKVER))
     PREFERED_SDKMAJORVER=$(shell echo $(PREFERED_SDKVER) | cut -d . -f 1)
@@ -134,6 +173,7 @@ else
 endif
 
 # Prefered WDK Version
+#	- 10.0.18362.0
 #	- 10.0.17134.0
 #	- 10.0.15063.0
 #	- 10.0.14393.0
@@ -141,7 +181,7 @@ endif
 #	- 10.0.10240.0
 #	- 10.0.10150.0
 
-PREFERED_WDKVER=
+#PREFERED_WDKVER=
 
 ifneq (,$(PREFERED_WDKVER))
     PREFERED_WDKMAJORVER=$(shell echo $(PREFERED_WDKVER) | cut -d . -f 1)
@@ -174,59 +214,24 @@ else
 endif
 
 # export VC dir
-export PATH := $(PATH):"$(PREFERED_VSDIR)/Common7/IDE":"$(PREFERED_VSDIR)/VC/bin":"$(PREFERED_SDKBINDIR)"
-
-#$(info Visual Studio (Prefered):     $(PREFERED_VSVER))
-#$(info Visual Studio (Short Ver):    $(PREFERED_VSVERSHORT))
-#$(info Visual Studio Dir (Prefered): $(PREFERED_VSDIR))
-#$(info Windows SDK (Prefered):       $(PREFERED_SDKVER))
-#$(info Windows SDK Bin (Prefered):   $(PREFERED_SDKBINDIR))
-#$(info Windows SDK Inc (Prefered):   $(PREFERED_SDKINCDIR))
-#$(info Windows SDK Lib (Prefered):   $(PREFERED_SDKLIBDIR))
-#$(info Windows WDK (Prefered):       $(PREFERED_WDKVER))
-#$(info Windows WDK Inc (Prefered):   $(PREFERED_WDKINCDIR))
-#$(info Windows WDK Lib (Prefered):   $(PREFERED_WDKLIBDIR))
+export PATH := $(PATH):"$(PREFERED_VSDIR)/Common7/IDE":"$(PREFERED_VSTOOLSDIR)":"$(PREFERED_SDKBINDIR)"
 
 #-----------------------------------#
 #			Path: Tools				#
 #-----------------------------------#
 MLNAME=ml.exe
-ifeq ($(BUILDARCH),x86)
-    VCBIN=VC/bin
-    #ifeq ($(dirProgramFiles),$(dirProgramFiles86))
-    #    VCBIN=VC/bin
-	#else
-    #    VCBIN=VC/bin/amd64_x86
-	#endif
-else ifeq ($(BUILDARCH),x64)
-    ifeq ($(dirProgramFiles),$(dirProgramFiles86))
-        VCBIN=VC/bin/x86_amd64
-	else
-        VCBIN=VC/bin/amd64
-	endif
-    MLNAME=ml64.exe
-else ifeq ($(BUILDARCH),arm)
-    ifeq ($(dirProgramFiles),$(dirProgramFiles86))
-        VCBIN=VC/bin/x86_arm
-	else
-        VCBIN=VC/bin/amd64_arm
-	endif
-else ifeq ($(BUILDARCH),arm64)
-    ifeq ($(dirProgramFiles),$(dirProgramFiles86))
-        VCBIN=VC/bin/x86_arm
-	else
-        VCBIN=VC/bin/amd64_arm
-	endif
+CC=$(PREFERED_VSTOOLSBINDIR)/cl.exe
+CXX=$(PREFERED_VSTOOLSBINDIR)/cl.exe
+ML=$(PREFERED_VSTOOLSBINDIR)/$(MLNAME)
+LIB=$(PREFERED_VSTOOLSBINDIR)/lib.exe
+LINK=$(PREFERED_VSTOOLSBINDIR)/link.exe
+ifeq ($(PREFERED_VSVER),140)
+    DUMPBIN=$(XVS2015TOOLSBIN32DIR)/dumpbin.exe
+    NMAKE=$(XVS2015TOOLSBIN32DIR)/nmake.exe
 else
-    VCBIN=VC/bin
+    DUMPBIN=$(PREFERED_VSTOOLSBINDIR)/dumpbin.exe
+    NMAKE=$(PREFERED_VSTOOLSBINDIR)/nmake.exe
 endif
-CC=$(PREFERED_VSDIR)/$(VCBIN)/cl.exe
-CXX=$(PREFERED_VSDIR)/$(VCBIN)/cl.exe
-ML=$(PREFERED_VSDIR)/$(VCBIN)/$(MLNAME)
-LIB=$(PREFERED_VSDIR)/$(VCBIN)/lib.exe
-LINK=$(PREFERED_VSDIR)/$(VCBIN)/link.exe
-DUMPBIN=$(PREFERED_VSDIR)/VC/bin/dumpbin.exe
-NMAKE=$(PREFERED_VSDIR)/VC/bin/nmake.exe
 
 RC=$(PREFERED_SDKBINDIR)/rc.exe
 MC=$(PREFERED_SDKBINDIR)/mc.exe
@@ -253,7 +258,7 @@ else
     IFLAGS += -I"$(PREFERED_SDKINCDIR)/shared"
     IFLAGS+=-I"$(PREFERED_SDKINCDIR)/um" \
 		    -I"$(PREFERED_SDKINCDIR)/ucrt" \
-		    -I"$(PREFERED_VSDIR)/VC/include" \
+		    -I"$(PREFERED_VSTOOLSDIR)/include" \
             -I"$(XWSROOT)/xinclude"
 endif
 
@@ -265,11 +270,16 @@ ifeq ($(TGTMODE),kernel)
     LFLAGS += -LIBPATH:"$(PREFERED_WDKLIBDIR)/km/$(BUILDARCH)"
 else
     ifeq ($(BUILDARCH), x64)
-        LFLAGS += -LIBPATH:"$(PREFERED_VSDIR)/VC/lib/amd64" \
-                  -LIBPATH:"$(PREFERED_VSDIR)/VC/atlmfc/lib/amd64"
+        LFLAGS += -LIBPATH:"$(PREFERED_VSTOOLSDIR)/lib/amd64" \
+                  -LIBPATH:"$(PREFERED_VSTOOLSDIR)/atlmfc/lib/amd64"
     else
-        LFLAGS += -LIBPATH:"$(PREFERED_VSDIR)/VC/lib" \
-                  -LIBPATH:"$(PREFERED_VSDIR)/VC/atlmfc/lib"
+        ifeq ($(PREFERED_VSVER), 140)
+            LFLAGS += -LIBPATH:"$(PREFERED_VSTOOLSDIR)/lib" \
+                    -LIBPATH:"$(PREFERED_VSTOOLSDIR)/atlmfc/lib"
+        else
+            LFLAGS += -LIBPATH:"$(PREFERED_VSTOOLSDIR)/lib/x86" \
+                    -LIBPATH:"$(PREFERED_VSTOOLSDIR)/atlmfc/lib/x86"
+        endif
     endif
     LFLAGS += -LIBPATH:"$(PREFERED_SDKLIBDIR)/um/$(BUILDARCH)" \
 		      -LIBPATH:"$(PREFERED_SDKLIBDIR)/ucrt/$(BUILDARCH)"
@@ -397,12 +407,12 @@ ifeq ($(TARGETMODE), kernel)
 	          -FI "$(PREFERED_WDKINCDIR)/shared/warning.h" \
 			  -fp:precise -Zp8 -errorReport:prompt -GF -W4 -Zc:inline -GR- -Gz -Oy- -nologo -kernel \
 			  -DKERNELMODE=1 -DSTD_CALL -D_WIN32_WINNT=0x$(TGTMINOSVER) -DWINVER=0x$(TGTMINOSVER) -DWINNT=1 -DNTDDI_VERSION=0x$(TGTMINOSVER)0000 \
-			  -DALLOC_PRAGMA -Fd"$(INTDIR)/vc$(PREFERED_VSVERSHORT).pdb"
+			  -DALLOC_PRAGMA -Fd"$(INTDIR)/vc$(PREFERED_TOOLSET_VER).pdb"
     CXXFLAGS += -MP -GS -analyze -Gy -Zc:wchar_t- -analyze:"stacksize1024" -Zi -Gm- \
 	          -FI "$(PREFERED_WDKINCDIR)/shared/warning.h" \
 			  -fp:precise -Zp8 -errorReport:prompt -GF -W4 -Zc:inline -GR- -Gz -Oy- -nologo -kernel \
 			  -DKERNELMODE=1 -DSTD_CALL -D_WIN32_WINNT=0x$(TGTMINOSVER) -DWINVER=0x$(TGTMINOSVER) -DWINNT=1 -DNTDDI_VERSION=0x$(TGTMINOSVER)0000 \
-			  -DALLOC_PRAGMA -Fp"$(INTDIR)/$(TGTNAME).pch" -Fd"$(INTDIR)/vc$(PREFERED_VSVERSHORT).pdb"
+			  -DALLOC_PRAGMA -Fp"$(INTDIR)/$(TGTNAME).pch" -Fd"$(INTDIR)/vc$(PREFERED_TOOLSET_VER).pdb"
     LFLAGS  += -kernel -MANIFEST:NO -PROFILE -Driver -PDB:$(INTDIR)/$(TGTNAME).pdb -VERSION:"6.3" -DEBUG -WX -OPT:REF -INCREMENTAL:NO \
 	            -SUBSYSTEM:$(TGTSUBSYS)$(TGTSUBSYSVER) -OPT:ICF -ERRORREPORT:PROMPT -MERGE:"_TEXT=.text;_PAGE=PAGE" -NOLOGO -NODEFAULTLIB -SECTION:"INIT,d" -IGNORE:4078 \
                 fltmgr.lib BufferOverflowK.lib ntoskrnl.lib hal.lib wmilib.lib Ntstrsafe.lib
@@ -417,10 +427,10 @@ else
 	# Windows User Mode Module
     CFLAGS   += -EHa -nologo -Zi -W3 -MP -GS -GL -FAcs -Gd -Zc:wchar_t -Zc:inline -fp:precise -errorReport:prompt -DUNICODE -D_UNICODE \
 	            -DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x$(TGTMINOSVER) -DWINVER=0x$(TGTMINOSVER) -DWINNT=1 -DNTDDI_VERSION=0x$(TGTMINOSVER)0000 \
-                -Fd"$(INTDIR)/vc$(PREFERED_VSVERSHORT).pdb" -Fa"$(INTDIR)/"
+                -Fd"$(INTDIR)/vc$(PREFERED_TOOLSET_VER).pdb" -Fa"$(INTDIR)/"
     CXXFLAGS += -EHa -nologo -Zi -W3 -MP -GS -GL -FAcs -Gd -Zc:wchar_t -Zc:inline -fp:precise -errorReport:prompt -DUNICODE -D_UNICODE \
 	            -DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x$(TGTMINOSVER) -DWINVER=0x$(TGTMINOSVER) -DWINNT=1 -DNTDDI_VERSION=0x$(TGTMINOSVER)0000 \
-                -Fd"$(INTDIR)/vc$(PREFERED_VSVERSHORT).pdb" -Fa"$(INTDIR)/"
+                -Fd"$(INTDIR)/vc$(PREFERED_TOOLSET_VER).pdb" -Fa"$(INTDIR)/"
     LFLAGS  += -NOLOGO -PROFILE -LTCG -DYNAMICBASE -NXCOMPAT -PDB:"$(INTDIR)/$(TGTNAME).pdb" -LTCG:incremental -TLBID:1 -SUBSYSTEM:$(TGTSUBSYS)$(TGTSUBSYSVER) \
                kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
     SLFLAGS += -NOLOGO -LTCG -SUBSYSTEM:WINDOWS
