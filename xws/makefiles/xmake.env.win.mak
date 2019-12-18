@@ -270,8 +270,13 @@ ifeq ($(TGTMODE),kernel)
     LFLAGS += -LIBPATH:"$(PREFERED_WDKLIBDIR)/km/$(BUILDARCH)"
 else
     ifeq ($(BUILDARCH), x64)
-        LFLAGS += -LIBPATH:"$(PREFERED_VSTOOLSDIR)/lib/amd64" \
-                  -LIBPATH:"$(PREFERED_VSTOOLSDIR)/atlmfc/lib/amd64"
+        ifeq ($(PREFERED_VSVER), 140)
+            LFLAGS += -LIBPATH:"$(PREFERED_VSTOOLSDIR)/lib/amd64" \
+                    -LIBPATH:"$(PREFERED_VSTOOLSDIR)/atlmfc/lib/amd64"
+        else
+            LFLAGS += -LIBPATH:"$(PREFERED_VSTOOLSDIR)/lib/x64" \
+                    -LIBPATH:"$(PREFERED_VSTOOLSDIR)/atlmfc/lib/x64"
+        endif
     else
         ifeq ($(PREFERED_VSVER), 140)
             LFLAGS += -LIBPATH:"$(PREFERED_VSTOOLSDIR)/lib" \
