@@ -36,15 +36,21 @@ typedef string_buffer<wchar_t>  wsbuf;
 template <typename T>
 void trim_left(std::basic_string<T>& s)
 {
-    while (!s.length() && iswspace(s[0]))
-        s = s.substr(1);
+    std::basic_string<T>::size_type pos = 0;
+    while (pos < s.length() && iswspace(s[pos]))
+        ++pos;
+    if (pos > 0)
+        s = pos < s.length() ? s.substr(pos) : "";
 }
 
 template <typename T>
 void trim_right(std::basic_string<T>& s)
 {
-    while (!s.length() && iswspace(s[s.length() - 1]))
-        s = s.substr(0, s.length() - 1);
+    std::basic_string<T>::size_type pos = 0;
+    while (pos < s.length() && iswspace(s[s.length() - pos - 1]))
+        ++pos;
+    if (pos > 0)
+        s = pos < s.length() ? s.substr(0, s.length() - pos) : "";
 }
 
 template <typename T>
