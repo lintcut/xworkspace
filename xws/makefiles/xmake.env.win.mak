@@ -408,7 +408,7 @@ endif
 
 ifeq ($(TARGETMODE), kernel)
 	# Windows Kernel Mode Module
-    CFLAGS += -MP -GS -analyze -Gy -Zc:wchar_t- -analyze:"stacksize1024" -Zi -Gm- \
+    CFLAGS += -MP -GS- -analyze -Gy -Zc:wchar_t- -analyze:"stacksize1024" -Zi -Gm- \
 	          -FI "$(PREFERED_WDKINCDIR)/shared/warning.h" \
 			  -fp:precise -Zp8 -errorReport:prompt -GF -W4 -Zc:inline -GR- -Gz -Oy- -nologo -kernel \
 			  -DKERNELMODE=1 -DSTD_CALL -D_WIN32_WINNT=0x$(TGTMINOSVER) -DWINVER=0x$(TGTMINOSVER) -DWINNT=1 -DNTDDI_VERSION=0x$(TGTMINOSVER)0000 \
@@ -430,7 +430,7 @@ ifeq ($(TARGETMODE), kernel)
     endif
 else
 	# Windows User Mode Module
-    CFLAGS   += -EHa -nologo -Zi -W3 -MP -GS -GL -FAcs -Gd -Zc:wchar_t -Zc:inline -fp:precise -errorReport:prompt -DUNICODE -D_UNICODE \
+    CFLAGS   += -EHa -nologo -Zi -W3 -MP -GS- -GL -FAcs -Gd -Zc:wchar_t -Zc:inline -fp:precise -errorReport:prompt -DUNICODE -D_UNICODE \
 	            -DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x$(TGTMINOSVER) -DWINVER=0x$(TGTMINOSVER) -DWINNT=1 -DNTDDI_VERSION=0x$(TGTMINOSVER)0000 \
                 -Fd"$(INTDIR)/vc$(PREFERED_TOOLSET_VER).pdb" -Fa"$(INTDIR)/"
     CXXFLAGS += -EHa -nologo -Zi -W3 -MP -GS -GL -FAcs -Gd -Zc:wchar_t -Zc:inline -fp:precise -errorReport:prompt -DUNICODE -D_UNICODE \
