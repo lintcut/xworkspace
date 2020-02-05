@@ -33,7 +33,7 @@ endif
 CC=gcc
 CXX=g++
 LIB=ar
-LINK=gcc
+LINK=g++
 
 LFLAGS=-L$(OUTDIR) -L$(INTDIR)
 SLFLAGS=-L$(OUTDIR) -L$(INTDIR)
@@ -49,8 +49,6 @@ IFLAGS+=-I/usr/include \
 
 LFLAGS=-L$(OUTDIR) -L$(INTDIR)
 LFLAGS += $(foreach dir, $(TGTLIBDIRS), $(addprefix -L,$(shell echo '$(dir)')))
-LFLAGS += -L/usr/lib \
-          -L/usr/local/lib
 
 #-----------------------------------#
 #	Options: Compiler				#
@@ -66,11 +64,11 @@ CXXFLAGS += -std=c++14 -fvisibility=hidden
 ifeq ($(BUILDARCH), x64)
     CFLAGS   += -march=x86-64 -m64
     CXXFLAGS += -march=x86-64 -m64
-    LFLAGS += -march=x86-64 -m64
+    LFLAGS += -march=x86-64 -m64 -L/usr/lib
 else ifeq ($(BUILDARCH), x86)
     CFLAGS   += -march=i386 -m32
     CXXFLAGS += -march=i386 -m32
-    LFLAGS += -march=i386 -m32
+    LFLAGS += -march=i386 -m32 -L/usr/lib32
 endif
 
 ifeq ($(BUILDTYPE),debug)
