@@ -89,7 +89,7 @@ ifeq (,$(TGTSRCDIRS))
 endif
 
 # 1. Prepare Source Dirs List
-TGTSRCDIRS:=. $(foreach d, $(TGTSRCDIRS), $(shell find $(d) -maxdepth $(SEARCH_DEPTH) -type d | sed 's/^\.\///' | grep -v '^\..*' | grep -v '^output\/*'))
+TGTSRCDIRS:=. $(foreach d, $(TGTSRCDIRS), $(shell find $(d) -maxdepth $(SEARCH_DEPTH) -type d | sed 's/^\.\///g' | grep -v '^\..*' | grep -v '^output\/*'))
 $(info TGTSRCDIRS = $(TGTSRCDIRS))
 # 2. Get c/cpp/cxx/asm files
 #		- enum files
@@ -184,7 +184,7 @@ endif
 
 # Rule for building ASM files
 %.o: %.s
-	@if [ $(patsubst %/,%,$(dir $<)) == . ]; then \
+	@if [ -z '$(patsubst %/,%,$(dir $<))' ]; then \
 		if [ ! -d $(INTDIR) ] ; then \
 			mkdir -p $(INTDIR) ; \
 		fi \
@@ -193,13 +193,13 @@ endif
 			mkdir -p $(INTDIR)/$(patsubst %/,%,$(dir $<)) ; \
 		fi \
 	fi
-	@if [ $(VERBOSE). == yes. ] ; then \
+	@if [ "$(VERBOSE)" = "yes" ]; then \
 		echo '"$(ML)" $(MLFLAGS) $(COUTFLAG) $(INTDIR)/$@ $(INFLAG) $<' ; \
 	fi
 	@"$(ML)" $(MLFLAGS) $(COUTFLAG) $(INTDIR)/$@ $(INFLAG) $< || exit 1
 
 %.o: %.asm
-	@if [ $(patsubst %/,%,$(dir $<)) == . ]; then \
+	@if [ -z '$(patsubst %/,%,$(dir $<))' ]; then \
 		if [ ! -d $(INTDIR) ] ; then \
 			mkdir -p $(INTDIR) ; \
 		fi \
@@ -208,14 +208,14 @@ endif
 			mkdir -p $(INTDIR)/$(patsubst %/,%,$(dir $<)) ; \
 		fi \
 	fi
-	@if [ $(VERBOSE). == yes. ] ; then \
+	@if [ "$(VERBOSE)" = "yes" ] ; then \
 		echo '"$(ML)" $(MLFLAGS) $(COUTFLAG) $(INTDIR)/$@ $(INFLAG) $<' ; \
 	fi
 	@"$(ML)" $(MLFLAGS) $(COUTFLAG) $(INTDIR)/$@ $(INFLAG) $< || exit 1
 
 # Rule for building C files
 %.o: %.c
-	@if [ $(patsubst %/,%,$(dir $<)) == . ]; then \
+	@if [ -z '$(patsubst %/,%,$(dir $<))' ]; then \
 		if [ ! -d $(INTDIR) ] ; then \
 			mkdir -p $(INTDIR) ; \
 		fi \
@@ -224,7 +224,7 @@ endif
 			mkdir -p $(INTDIR)/$(patsubst %/,%,$(dir $<)) ; \
 		fi \
 	fi
-	@if [ $(VERBOSE). == yes. ] ; then \
+	@if [ "$(VERBOSE)" = "yes" ] ; then \
 		echo '"$(CC)" $(CFLAGS) $(IFLAGS) $(INFLAG) $< $(COUTFLAG)$(INTDIR)/$@' ; \
 	fi
 	@"$(CC)" $(CFLAGS) $(IFLAGS) $(INFLAG) $< $(COUTFLAG)$(INTDIR)/$@ || exit 1
@@ -232,7 +232,7 @@ endif
 
 # Rule for building C++ files
 %.o: %.cpp
-	@if [ $(patsubst %/,%,$(dir $<)) == . ]; then \
+	@if [ -z '$(patsubst %/,%,$(dir $<))' ]; then \
 		if [ ! -d $(INTDIR) ] ; then \
 			mkdir -p $(INTDIR) ; \
 		fi \
@@ -241,14 +241,14 @@ endif
 			mkdir -p $(INTDIR)/$(patsubst %/,%,$(dir $<)) ; \
 		fi \
 	fi
-	@if [ $(VERBOSE). == yes. ] ; then \
+	@if [ "$(VERBOSE)" = "yes" ]; then \
 		echo '"$(CXX)" $(CXXFLAGS) $(PCHUFLAGS) $(IFLAGS) $(INFLAG) $< $(COUTFLAG)$(INTDIR)/$@' ; \
 	fi
 	@"$(CXX)" $(CXXFLAGS) $(PCHUFLAGS) $(IFLAGS) $(INFLAG) $< $(COUTFLAG)$(INTDIR)/$@ || exit 1
 
 # Rule for Precompiled Header File  // $(TGTPCHNAME).cpp
 $(TGTNAME).pch: $(TGTPCHSRC)
-	@if [ $(patsubst %/,%,$(dir $<)) == . ]; then \
+	@if [ -z '$(patsubst %/,%,$(dir $<))' ]; then \
 		if [ ! -d $(INTDIR) ] ; then \
 			mkdir -p $(INTDIR) ; \
 		fi \
@@ -257,14 +257,14 @@ $(TGTNAME).pch: $(TGTPCHSRC)
 			mkdir -p $(INTDIR)/$(patsubst %/,%,$(dir $<)) ; \
 		fi \
 	fi
-	@if [ $(VERBOSE). == yes. ] ; then \
+	@if [ "$(VERBOSE)" = "yes" ] ; then \
 		echo '"$(CXX)" $(CXXFLAGS) $(PCHCFLAGS) $(IFLAGS) $(INFLAG) $< $(COUTFLAG)$(INTDIR)' ; \
 	fi
 	@"$(CXX)" $(CXXFLAGS) $(PCHCFLAGS) $(IFLAGS) $(INFLAG) $< $(COUTFLAG)$(INTDIR)/$(TGTPCHNAME).o || exit 1
 
 # Rule for building the resources
 %.res: %.rc
-	@if [ $(patsubst %/,%,$(dir $<)) == . ]; then \
+	@if [ -z '$(patsubst %/,%,$(dir $<))' ]; then \
 		if [ ! -d $(INTDIR) ] ; then \
 			mkdir -p $(INTDIR) ; \
 		fi \
@@ -273,7 +273,7 @@ $(TGTNAME).pch: $(TGTPCHSRC)
 			mkdir -p $(INTDIR)/$(patsubst %/,%,$(dir $<)) ; \
 		fi \
 	fi
-	@if [ $(VERBOSE). == yes. ] ; then \
+	@if [ "$(VERBOSE)" = "yes" ] ; then \
 		echo '"$(RC)" $(RCFLAGS) $(IFLAGS) $(COUTFLAG) $(INTDIR)/$@ $<' ; \
 	fi
 	@"$(RC)" $(RCFLAGS) $(IFLAGS) $(COUTFLAG) $(INTDIR)/$@ $< || exit 1
@@ -281,7 +281,7 @@ $(TGTNAME).pch: $(TGTPCHSRC)
 # Rule for building MIDL files
 #	generate 4 files: %.tlb, %.h, %_i.c and %_p.c
 %.tlb: %.idl
-	@if [ $(patsubst %/,%,$(dir $<)) == . ]; then \
+	@if [ -z '$(patsubst %/,%,$(dir $<))' ]; then \
 		if [ ! -d $(INTDIR) ] ; then \
 			mkdir -p $(INTDIR) ; \
 		fi \
@@ -290,7 +290,7 @@ $(TGTNAME).pch: $(TGTPCHSRC)
 			mkdir -p $(INTDIR)/$(patsubst %/,%,$(dir $<)) ; \
 		fi \
 	fi
-	@if [ $(VERBOSE). == yes. ] ; then \
+	@if [ "$(VERBOSE)" = "yes" ] ; then \
 		echo '"$(MIDL)" $(MIDL_CFLAGS) $(MIDL_DFLAGS) $(IFLAGS) /out $(INTDIR) $<' ; \
 	fi
 	@"$(MIDL)" $(MIDL_CFLAGS) $(MIDL_DFLAGS) $(IFLAGS) /out $(INTDIR) $< || exit 1
@@ -302,7 +302,7 @@ $(TGTNAME).pch: $(TGTPCHSRC)
 # Rule for Output: Library
 $(TGTNAME).lib: $(OBJS) $(RCOBJS)
 	@echo "> Linking ..."
-	@if [ $(VERBOSE). == yes. ] ; then \
+	@if [ "$(VERBOSE)" = "yes" ] ; then \
 		echo '"$(LIB)" $(SLFLAGS) $^ $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).lib" $(TGTLIBS)' ; \
 	fi
 	@"$(LIB)" $(SLFLAGS) $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).lib" $^ $(PCHOBJ) $(TGTLIBS)
@@ -310,23 +310,28 @@ $(TGTNAME).lib: $(OBJS) $(RCOBJS)
 	  mkdir -p $(OUTDIR) ; \
 	fi
 	@mv -f "$(INTDIR)/$(TGTNAME).lib" "$(OUTDIR)/$(TGTNAME).lib"
-	@if [ ! $(PKGROOT). == . ] ; then \
+	@if [ ! -z '$(PKGROOT)' ] ; then \
 		if [ ! -d $(PKGROOT)/$(OUTDIR) ] ; then \
 			mkdir -p $(PKGROOT)/$(OUTDIR) ; \
 		fi ; \
 	  	cp -f "$(OUTDIR)/$(TGTNAME).exe" "$(PKGROOT)/$(OUTDIR)/$(TGTNAME).lib" ; \
 	fi
 
-$(TGTNAME).a: $(OBJS) $(RCOBJS)
+$(TGTNAME).a: $(OBJS)
 	@echo "> Linking ..."
+	@if [ "$(VERBOSE)" = "yes" ] ; then \
+		echo '"$(LIB)" rcs $(LOUTFLAG)$(INTDIR)/$(TGTNAME).a' $(TGTLIBS) $(PCHOBJ) $(foreach f, $^, $(addprefix $(INTDIR)/,$f)) ; \
+	fi
+	@$(LIB) rcs $(LOUTFLAG)$(INTDIR)/$(TGTNAME).a $(TGTLIBS) $(PCHOBJ) $(foreach f, $^, $(addprefix $(INTDIR)/,$f))
 	@if [ ! -d $(OUTDIR) ] ; then \
 	  mkdir -p $(OUTDIR) ; \
 	fi
+	@mv -f "$(INTDIR)/$(TGTNAME).a" "$(OUTDIR)/$(TGTNAME).a"
 
 # Rule for Output: Dll
 $(TGTNAME).dll: $(OBJS) $(RCOBJS)
 	@echo "> Linking ..."
-	@if [ $(VERBOSE). == yes. ] ; then \
+	@if [ '$(VERBOSE)'=='yes' ] ; then \
 		echo '"$(LINK)" $(LFLAGS) $(PCHOBJ) $^ $(TGTLIBS) $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).dll"' ; \
 	fi
 	@"$(LINK)" $(LFLAGS) $(PCHOBJ) $^ $(TGTLIBS) $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).dll"
@@ -335,10 +340,10 @@ $(TGTNAME).dll: $(OBJS) $(RCOBJS)
 	fi
 	@mv -f "$(INTDIR)/$(TGTNAME).dll" "$(OUTDIR)/$(TGTNAME).dll"
 	@mv -f "$(INTDIR)/$(TGTNAME).lib" "$(OUTDIR)/$(TGTNAME).lib"
-	@if [ $(XOS). == Windows. ] ; then \
+	@if [ "$(XOS)" = "Windows" ] ; then \
 	  	mv -f "$(INTDIR)/$(TGTNAME).pdb" "$(OUTDIR)/$(TGTNAME).pdb" ; \
 	fi
-	@if [ ! $(PKGROOT). == . ] ; then \
+	@if [ ! -z '$(PKGROOT)' ] ; then \
 		if [ ! -d $(PKGROOT)/$(OUTDIR) ] ; then \
 			mkdir -p $(PKGROOT)/$(OUTDIR) ; \
 		fi ; \
@@ -347,7 +352,15 @@ $(TGTNAME).dll: $(OBJS) $(RCOBJS)
 	  	cp -f "$(OUTDIR)/$(TGTNAME).pdb" "$(PKGROOT)/$(OUTDIR)/$(TGTNAME).pdb" ; \
 	fi
 
-$(TGTNAME).so: $(OBJS) $(RCOBJS)
+$(TGTNAME).so: $(OBJS)
+	@if [ "$(VERBOSE)" = "yes" ] ; then \
+		echo '"$(LINK)" $(LFLAGS) $(TGTLIBS) $(PCHOBJ) $(foreach f, $^, $(addprefix $(INTDIR)/,$f)) $(LOUTFLAG)$(INTDIR)/$(TGTNAME).so' ; \
+	fi
+	@$(LINK) $(LFLAGS) $(TGTLIBS) $(PCHOBJ) $(foreach f, $^, $(addprefix $(INTDIR)/,$f)) $(LOUTFLAG)$(INTDIR)/$(TGTNAME).so
+	@if [ ! -d $(OUTDIR) ] ; then \
+	  mkdir -p $(OUTDIR) ; \
+	fi
+	@mv -f "$(INTDIR)/$(TGTNAME).so" "$(OUTDIR)/$(TGTNAME).so"
 	@echo "> Linking ..."
 	@if [ ! -d $(OUTDIR) ] ; then \
 	  mkdir -p $(OUTDIR) ; \
@@ -355,7 +368,7 @@ $(TGTNAME).so: $(OBJS) $(RCOBJS)
 
 $(TGTNAME).dynlib: $(OBJS) $(RCOBJS)
 	@echo "> Linking ..."
-	@if [ ! $(XOS). == Mac. ]; then \
+	@if [ ! "$(XOS)" = "Mac" ]; then \
 	    echo 'error: Dynlib file is only for MacOS' ; \
 	    exit 1 ; \
 	fi
@@ -366,7 +379,7 @@ $(TGTNAME).dynlib: $(OBJS) $(RCOBJS)
 # Rule for Output: Executable
 $(TGTNAME).exe: $(OBJS) $(RCOBJS)
 	@echo "> Linking ..."
-	@if [ $(VERBOSE). == yes. ] ; then \
+	@if [ "$(VERBOSE)" = "yes" ] ; then \
 		echo '"$(LINK)" $(LFLAGS) $(TGTLIBS) $(PCHOBJ) $^ $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).exe"' ; \
 	fi
 	@"$(LINK)" $(LFLAGS) $(TGTLIBS) $(PCHOBJ) $^ $(LOUTFLAG)"$(INTDIR)/$(TGTNAME).exe"
@@ -374,10 +387,10 @@ $(TGTNAME).exe: $(OBJS) $(RCOBJS)
 	  mkdir -p $(OUTDIR) ; \
 	fi
 	@mv -f "$(INTDIR)/$(TGTNAME).exe" "$(OUTDIR)/$(TGTNAME).exe"
-	@if [ $(XOS). == Windows. ] ; then \
+	@if [ "$(XOS)" = "Windows" ] ; then \
 	  	mv -f "$(INTDIR)/$(TGTNAME).pdb" "$(OUTDIR)/$(TGTNAME).pdb" ; \
 	fi
-	@if [ ! $(PKGROOT). == . ] ; then \
+	@if [ ! -z '$(PKGROOT)' ] ; then \
 		if [ ! -d $(PKGROOT)/$(OUTDIR) ] ; then \
 			mkdir -p $(PKGROOT)/$(OUTDIR) ; \
 		fi ; \
@@ -385,16 +398,21 @@ $(TGTNAME).exe: $(OBJS) $(RCOBJS)
 	  	cp -f "$(OUTDIR)/$(TGTNAME).pdb" "$(PKGROOT)/$(OUTDIR)/$(TGTNAME).pdb" ; \
 	fi
 
-$(TGTNAME): $(OBJS) $(RCOBJS)
+$(TGTNAME): $(OBJS)
 	@echo "> Linking ..."
+	@if [ "$(VERBOSE)" = "yes" ] ; then \
+		echo '"$(LINK)" $(LFLAGS) $(TGTLIBS) $(PCHOBJ) $(foreach f, $^, $(addprefix $(INTDIR)/,$f)) $(LOUTFLAG)$(INTDIR)/$(TGTNAME)' ; \
+	fi
+	@$(LINK) $(LFLAGS) $(TGTLIBS) $(PCHOBJ) $(foreach f, $^, $(addprefix $(INTDIR)/,$f)) $(LOUTFLAG)$(INTDIR)/$(TGTNAME)
 	@if [ ! -d $(OUTDIR) ] ; then \
 	  mkdir -p $(OUTDIR) ; \
 	fi
+	@mv -f "$(INTDIR)/$(TGTNAME)" "$(OUTDIR)/$(TGTNAME)"
 
 # Rule for Output: Sys
 $(TGTNAME).sys: $(OBJS) $(RCOBJS)
 	@echo "> Linking ..."
-	@if [ ! $(XOS). == Windows. ]; then \
+	@if [ ! "$(XOS)" = "Windows" ]; then \
 	    echo 'error: SYS file is only for Windows' ; \
 	    exit 1 ; \
 	fi
@@ -417,7 +435,7 @@ printsrcs:
 	@for f in $(RESOURCES) ; do echo "  $$f" ; done
 	@echo 'IDLs:'
 	@for f in $(IDLS) ; do echo "  $$f" ; done
-	@if [ $(TGTTYPE). == dll. ]; then \
+	@if [ '$(TGTTYPE)' = 'dll' ]; then \
 		echo 'DEF: $(DEFFILE)' ; \
 	fi
 	@echo 'MANIFESTSs:'
@@ -431,12 +449,12 @@ printobjs:
 
 buildcheck:
 	@echo '> Initializing ...'
-	@if [ $(BUILDARCH). == . ]; then \
-	    echo 'error: BUILDARCH is not defined' ; \
+	@if [ -z "$(BUILDARCH)" ]; then \
+	    echo 'error: BUILDARCH ($(BUILDARCH)) is not defined' ; \
 	    exit 1 ; \
 	fi
-	@if [ $(BUILDTYPE). == . ]; then \
-	    echo 'error: BUILDTYPE is not defined' ; \
+	@if [ -z "$(BUILDTYPE)" ]; then \
+	    echo 'error: BUILDTYPE ($(BUILDTYPE)) is not defined' ; \
 	    exit 1 ; \
 	fi
 
@@ -452,7 +470,7 @@ buildall: stageStart buildcheck stageCompiling $(PCHFILE) $(TGTNAME)$(TGTEXT)
 	@echo "Build Succeed (Used: $(DURATION) seconds)"
 
 buildclean:
-	@if [[ $(BUILDARCH). == . || $(BUILDTYPE). == . ]]; then \
+	@if [ -z '$(BUILDARCH)' ] || [ -z '$(BUILDTYPE)' ]; then \
 	    echo 'Clean all' ; \
 		echo '  - deleting "output" ...' ; \
 		rm -rf output ; \
