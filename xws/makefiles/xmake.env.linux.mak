@@ -62,12 +62,12 @@ CFLAGS   += -std=c99 -fvisibility=hidden
 CXXFLAGS += -std=c++14 -fvisibility=hidden
 
 ifeq ($(BUILDARCH), x64)
-    CFLAGS   += -march=x86-64 -m64
-    CXXFLAGS += -march=x86-64 -m64
+    CFLAGS   += -march=x86-64 -m64 -DBOOST_ERROR_CODE_HEADER_ONLY -DOPENSSL_API_COMPAT=0x0908
+    CXXFLAGS += -march=x86-64 -m64 -DBOOST_ERROR_CODE_HEADER_ONLY -DOPENSSL_API_COMPAT=0x0908
     LFLAGS += -march=x86-64 -m64 -L/usr/lib
 else ifeq ($(BUILDARCH), x86)
-    CFLAGS   += -march=i386 -m32
-    CXXFLAGS += -march=i386 -m32
+    CFLAGS   += -march=i386 -m32 -DBOOST_ERROR_CODE_HEADER_ONLY -DOPENSSL_API_COMPAT=0x0908
+    CXXFLAGS += -march=i386 -m32 -DBOOST_ERROR_CODE_HEADER_ONLY -DOPENSSL_API_COMPAT=0x0908
     LFLAGS += -march=i386 -m32 -L/usr/lib32
 endif
 

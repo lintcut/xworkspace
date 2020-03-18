@@ -401,9 +401,9 @@ $(TGTNAME).exe: $(OBJS) $(RCOBJS)
 $(TGTNAME): $(OBJS)
 	@echo "> Linking ..."
 	@if [ "$(VERBOSE)" = "yes" ] ; then \
-		echo '"$(LINK)" $(LFLAGS) $(TGTLIBS) $(PCHOBJ) $(foreach f, $^, $(addprefix $(INTDIR)/,$f)) $(LOUTFLAG)$(INTDIR)/$(TGTNAME)' ; \
+		echo '"$(LINK)" $(LFLAGS) $(PCHOBJ) $(foreach f, $^, $(addprefix $(INTDIR)/,$f)) $(TGTLIBS) $(LOUTFLAG)$(INTDIR)/$(TGTNAME)' ; \
 	fi
-	@$(LINK) $(LFLAGS) $(TGTLIBS) $(PCHOBJ) $(foreach f, $^, $(addprefix $(INTDIR)/,$f)) $(LOUTFLAG)$(INTDIR)/$(TGTNAME)
+	@$(LINK) $(LFLAGS) $(TGTLIBS) $(foreach f, $^, $(addprefix $(INTDIR)/,$f)) $(PCHOBJ) $(LOUTFLAG)$(INTDIR)/$(TGTNAME)
 	@if [ ! -d $(OUTDIR) ] ; then \
 	  mkdir -p $(OUTDIR) ; \
 	fi
