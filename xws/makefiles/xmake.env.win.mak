@@ -451,6 +451,14 @@ ifneq ($(TGTPCHNAME),)
     PCHUFLAGS = -Yu"$(TGTPCHNAME).h" -Fp"$(INTDIR)/$(PCHFILE)"
 endif
 
+ifneq ($(TGT_C_OPTIONS),)
+    CFLAGS += $(addprefix -, $(TGT_C_OPTIONS))
+endif
+
+ifneq ($(TGT_CXX_OPTIONS),)
+    CXXFLAGS += $(addprefix -, $(TGT_CXX_OPTIONS))
+endif
+
 #-----------------------------------#
 #	Rules					        #
 #-----------------------------------#

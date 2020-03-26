@@ -76,7 +76,10 @@ DURATION=$(shell echo $$(( $(CURSECONDS) - $(TMSTART) )))
 #_$(THREADMODE)
 OUTDIRNAME=$(TGTPLATFORM)_$(BUILDTYPE)_$(BUILDARCH)
 INTDIR=output/intermediate/$(TGTNAME)/$(OUTDIRNAME)
-OUTDIR=output/$(OUTDIRNAME)
+ifeq ($(OUTROOTDIR),)
+	OUTROOTDIR=output
+endif
+OUTDIR=$(OUTROOTDIR)/$(OUTDIRNAME)
 
 
 #-----------------------------------#
