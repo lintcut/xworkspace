@@ -53,12 +53,16 @@ THREADMODE=mt
 #			* COM: .idl
 #			* Manifest: .manifest
 #			* Resource: .rc
+TGTSRCFINDER=AUTO
 TGTSRCDIRS=
 #	- Single files
 TGTSOURCES=
 
 # Extra Processor Defines
 TGTDEFINES=BOOST_AUTO_LINK_TAGGED
+TGT_C_OPTIONS=
+TGT_CXX_OPTIONS=
+TGT_LINK_OPTIONS=
 
 # Include/Library dirs
 TGTINCDIRS=$(BOOST_DIR)/include
@@ -77,6 +81,10 @@ TGTPCHNAME=
 WARNS_IGNORED=
 #	- Treat as error: if empty, default to 'Treat All As Error'
 WARNS_AS_ERROR=
+
+# Override default out root dir
+#   Default value is: output
+OUTROOTDIR=
 
 # DON NOT CHANGE THIS LINE
 include $(XWSROOT)/xws/makefiles/xmake.mak

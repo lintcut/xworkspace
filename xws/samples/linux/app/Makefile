@@ -66,7 +66,7 @@ TGTLIBS=
 
 # Precompile file name (If it is empty, then no precompile header)
 #	Generated:	$(TGTNAME).pch
-TGTPCHNAME=xpch
+TGTPCHNAME=
 
 # Warnings
 #	- Ignored

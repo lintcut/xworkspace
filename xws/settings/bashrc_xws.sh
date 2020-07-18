@@ -77,6 +77,11 @@ alias makex64rel='make BUILDARCH=x64 BUILDTYPE=release'
 alias makex64dbg='make BUILDARCH=x64 BUILDTYPE=debug'
 alias makex64nop='make BUILDARCH=x64 BUILDTYPE=noopt'
 
+# This fix git-bash ssh connection problem
+alias xssh='ssh -o IdentitiesOnly=yes'
+alias xscp='scp -o IdentitiesOnly=yes'
+alias mysql='winpty mysql'
+
 # Git Alias
 #  -> get status
 alias gits='git status'
