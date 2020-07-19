@@ -459,6 +459,21 @@ ifneq ($(TGT_CXX_OPTIONS),)
     CXXFLAGS += $(addprefix -, $(TGT_CXX_OPTIONS))
 endif
 
+ifneq ($(WARNS_IGNORED),)
+    CFLAGS += $(addprefix -wd, $(WARNS_IGNORED))
+    CXXFLAGS += $(addprefix -wd, $(WARNS_IGNORED))
+endif
+
+ifneq ($(WARNS_AS_ERROR),)
+	ifeq ($(WARNS_AS_ERROR),all)
+		CFLAGS += -WX
+		CXXFLAGS += -WX
+	else
+		CFLAGS += $(addprefix -we, $(WARNS_AS_ERROR))
+		CXXFLAGS += $(addprefix -we, $(WARNS_AS_ERROR))
+	endif
+endif
+
 #-----------------------------------#
 #	Rules					        #
 #-----------------------------------#

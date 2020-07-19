@@ -85,18 +85,22 @@ OUTDIR=$(OUTROOTDIR)/$(OUTDIRNAME)
 #-----------------------------------#
 #				Sources				#
 #-----------------------------------#
-SOURCETYPES=c* asm
+SOURCETYPES=c cpp cxx asm s
+
 SEARCH_DEPTH=10
+
 ifeq (,$(TGTSRCDIRS))
     TGTSRCDIRS=.
 endif
 
 # 1. Prepare Source Dirs List
-TGTSRCDIRS:=. $(foreach d, $(TGTSRCDIRS), $(shell find $(d) -maxdepth $(SEARCH_DEPTH) -type d | sed 's/^\.\///g' | grep -v '^\..*' | grep -v '^output\/*'))
+ifeq (AUTO,$(TGTSRCFINDER))
+	TGTSRCDIRS:=. $(foreach d, $(TGTSRCDIRS), $(shell find $(d) -maxdepth $(SEARCH_DEPTH) -type d | sed 's/^\.\///g' | grep -v '^\..*' | grep -v '^output\/*'))
+endif
 $(info TGTSRCDIRS = $(TGTSRCDIRS))
 # 2. Get c/cpp/cxx/asm files
 #		- enum files
-SOURCES = $(foreach dir, $(TGTSRCDIRS), $(foreach pattern, c* asm s, $(wildcard $(dir)/*.$(pattern))))
+SOURCES = $(foreach dir, $(TGTSRCDIRS), $(foreach pattern, $(SOURCETYPES), $(wildcard $(dir)/*.$(pattern))))
 SOURCES += $(TGTSOURCES)
 # 		- exclude precompile header source file
 ifneq (,$(TGTPCHNAME))
