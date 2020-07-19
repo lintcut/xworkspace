@@ -1,0 +1,6 @@
+external/libs/**/*.lib filter=lfs diff=lfs merge=lfs -text
+external/libs/**/*.dll filter=lfs diff=lfs merge=lfs -text
+external/libs/**/*.pdb filter=lfs diff=lfs merge=lfs -text
+external/libs/**/*.exe filter=lfs diff=lfs merge=lfs -text
+external/bin/**/*.exe filter=lfs diff=lfs merge=lfs -text
+external/bin/**/*.dll filter=lfs diff=lfs merge=lfs -text
