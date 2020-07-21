@@ -61,3 +61,48 @@ This folder contains 3rd-party libraries original source files.
 - [websocketpp 0.8.2](https://github.com/zaphoyd/websocketpp)
 - [brotli 1.0.7](https://github.com/google/brotli)
 - [jansson 2.13.1](https://github.com/akheron/jansson)
+- [yara 4.0.2](https://virustotal.github.io/yara/)
+
+## HOWTOs ##
+
+### How to build boost ###
+
+- Download latest version boost source code and extract to `"$XWSROOT/external/sources/boost_x_xx_x"`.
+- Modify script `"$XWSROOT/external/sources/xws-build-boost.sh"` and set correct version.
+- In git-bash, run `"$XWSROOT/external/sources/xws-build-boost.sh"`
+
+### How to build openssl ###
+
+- Download latest version openssl source code and extract to `"$XWSROOT/external/sources/openssl_x_x_x"`.
+- Modify script `"$XWSROOT/external/sources/xws-build-openssl.sh"` and set correct version.
+- Check `"$XWSROOT/external/sources/xws-build-openssl-cmd.bat"` and make sure `perl.exe` path is correct.
+- In git-bash, run `"$XWSROOT/external/sources/xws-build-openssl.sh"`
+
+### How to build zlib ###
+
+- Download latest version zlib source code and extract to `"$XWSROOT/external/sources/zlib-x-x-x"`.
+- Modify script `"$XWSROOT/external/sources/xws-build-zlib.sh"` and set correct version.
+- In git-bash, run `"$XWSROOT/external/sources/xws-build-zlib.sh"`
+
+### How to build jansson ###
+
+- Download latest version jansson source code and extract to `"$XWSROOT/external/sources/jansson-x-x-x"`.
+- In git-bash, run folloing command:
+
+```bash
+cd $XWSROOT/external/sources/jansson-x-x-x
+mkdir build
+cd build
+cmake ..
+```
+
+- This generate correct MSVC solution/project files. Modify project file for jansson library, and build it.
+- Copy header file and final binaries to `"$XWSROOT/external/include/"` and `"$XWSROOT/external/libs/jansson/"`
+
+### How to build yara ###
+
+- Download latest version yara source code and extract to `"$XWSROOT/external/sources/yara-x-x-x"`.
+- Copy `"$XWSROOT/external/sources/yara-x-x-x/windows/vs2017"` to `"$XWSROOT/external/sources/yara-x-x-x/windows/vs2019"` (if you want to build with vs2019)
+- Open `"$XWSROOT/external/sources/yara-x-x-x/windows/vs2019/yara.sln"` with vs2019 and let it upgrade all projects files.
+- Modify project settings to set correct include/lib path (use openssl and jansson in `"$XWSROOT/external"`) and set correct output name.
+- Copy header files and final binaries to `"$XWSROOT/external/include/"` and `"$XWSROOT/external/libs/yara/"`
