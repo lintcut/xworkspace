@@ -24,6 +24,8 @@ xwsgetos(){
     UNAMESTR=`xwstoupper \`uname -s\``
     if [[ "$UNAMESTR" == MINGW* ]]; then
         echo Windows
+    elif [[ "$UNAMESTR" == MSYS* ]]; then
+        echo Windows
     elif [[ "$UNAMESTR" == *LINUX* ]]; then
         echo Linux
     elif [ "{$UNAMESTR}" == "{FREEBSD}" ]; then
