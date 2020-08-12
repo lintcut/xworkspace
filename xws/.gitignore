@@ -53,3 +53,5 @@ xcuserdata/
 *.vc.db
 *.vc.opendb
 *.aps
+*.cod
+*.nativecodeanalysis.xml

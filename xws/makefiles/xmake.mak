@@ -26,9 +26,9 @@ include $(XWSROOT)/xws/makefiles/xmake.targetprep.mak
 		fi \
 	fi
 	@if [ "$(VERBOSE)" = "yes" ]; then \
-		echo '"$(TOOL_ML)" $(BUILD_MLFLAGS) -Fo $(BUILD_INTDIR)/$@ -c $<' ; \
+		echo '"$(TOOL_ML)" $(BUILD_MLFLAGS) -c $< -Fo"$(BUILD_INTDIR)/$@"' ; \
 	fi
-	@"$(TOOL_ML)" $(BUILD_MLFLAGS) -Fo $(BUILD_INTDIR)/$@ -c $< || exit 1
+	@"$(TOOL_ML)" $(BUILD_MLFLAGS) -c $< -Fo"$(BUILD_INTDIR)/$@" || exit 1
 
 %.o: %.asm
 	@if [ -z '$(patsubst %/,%,$(dir $<))' ]; then \
@@ -41,9 +41,9 @@ include $(XWSROOT)/xws/makefiles/xmake.targetprep.mak
 		fi \
 	fi
 	@if [ "$(VERBOSE)" = "yes" ] ; then \
-		echo '"$(TOOL_ML)" $(BUILD_MLFLAGS) -Fo $(BUILD_INTDIR)/$@ -c $<' ; \
+		echo '"$(TOOL_ML)" $(BUILD_MLFLAGS) -c $< -Fo"$(BUILD_INTDIR)/$@"' ; \
 	fi
-	@"$(TOOL_ML)" $(BUILD_MLFLAGS) -Fo $(BUILD_INTDIR)/$@ -c $< || exit 1
+	@"$(TOOL_ML)" $(BUILD_MLFLAGS) -c $< -Fo"$(BUILD_INTDIR)/$@" || exit 1
 
 # Rule for building C files
 %.o: %.c
@@ -57,9 +57,9 @@ include $(XWSROOT)/xws/makefiles/xmake.targetprep.mak
 		fi \
 	fi
 	@if [ "$(VERBOSE)" = "yes" ] ; then \
-		echo '"$(TOOL_CC)" $(BUILD_CFLAGS) -c $< -Fo $(BUILD_INTDIR)/$@' ; \
+		echo '"$(TOOL_CC)" $(BUILD_CFLAGS) -c $< -Fo"$(BUILD_INTDIR)/$@"' ; \
 	fi
-	@"$(TOOL_CC)" $(BUILD_CFLAGS) -c $< -Fo $(BUILD_INTDIR)/$@ || exit 1
+	@"$(TOOL_CC)" $(BUILD_CFLAGS) -c $< -Fo"$(BUILD_INTDIR)/$@" || exit 1
 
 
 # Rule for building C++ files
@@ -84,11 +84,19 @@ $(TARGETNAME).pch:
 	@if [ ! -d $(BUILD_INTDIR) ] ; then \
 		mkdir -p $(BUILD_INTDIR) ; \
 	fi
-	@echo '#include "$(TARGET_PCHNAME)"' > $(BUILD_INTDIR)/$(TARGET_PCHBASENAME).cpp
-	@if [ "$(VERBOSE)" = "yes" ] ; then \
-		echo '"$(TOOL_CXX)" $(BUILD_CXXFLAGS) $(CREATE_PCHFLAG) -c "$(BUILD_INTDIR)/$(TARGET_PCHBASENAME).cpp" -Fo"$(BUILD_INTDIR)/$(TARGET_PCHBASENAME).o"' ; \
+	@if [ "$(TARGETMODE)" = "kernel" ] ; then \
+		echo '#include "$(TARGET_PCHNAME)"' > $(BUILD_INTDIR)/$(TARGET_PCHBASENAME).c ; \
+		if [ "$(VERBOSE)" = "yes" ] ; then \
+			echo '"$(TOOL_CC)" $(BUILD_CXXFLAGS) $(CREATE_PCHFLAG) -c "$(BUILD_INTDIR)/$(TARGET_PCHBASENAME).c" -Fo"$(BUILD_INTDIR)/$(TARGET_PCHBASENAME).o"' ; \
+		fi ; \
+		"$(TOOL_CC)" $(BUILD_CXXFLAGS) $(CREATE_PCHFLAG) -c "$(BUILD_INTDIR)/$(TARGET_PCHBASENAME).c" -Fo"$(BUILD_INTDIR)/$(TARGET_PCHBASENAME).o" || exit 1 ; \
+	else \
+		echo '#include "$(TARGET_PCHNAME)"' > $(BUILD_INTDIR)/$(TARGET_PCHBASENAME).cpp ; \
+		if [ "$(VERBOSE)" = "yes" ] ; then \
+			echo '"$(TOOL_CXX)" $(BUILD_CXXFLAGS) $(CREATE_PCHFLAG) -c "$(BUILD_INTDIR)/$(TARGET_PCHBASENAME).cpp" -Fo"$(BUILD_INTDIR)/$(TARGET_PCHBASENAME).o"' ; \
+		fi ; \
+		"$(TOOL_CXX)" $(BUILD_CXXFLAGS) $(CREATE_PCHFLAG) -c "$(BUILD_INTDIR)/$(TARGET_PCHBASENAME).cpp" -Fo"$(BUILD_INTDIR)/$(TARGET_PCHBASENAME).o" || exit 1 ; \
 	fi
-	@"$(TOOL_CXX)" $(BUILD_CXXFLAGS) $(CREATE_PCHFLAG) -c "$(BUILD_INTDIR)/$(TARGET_PCHBASENAME).cpp" -Fo"$(BUILD_INTDIR)/$(TARGET_PCHBASENAME).o" || exit 1
 
 # Rule for building the resources
 %.res: %.rc

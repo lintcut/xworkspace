@@ -224,7 +224,11 @@ TOOL_PVK2PFX=
 
 TOOL_CC=$(XBUILD_VCBINDIR)/cl.exe
 TOOL_CXX=$(XBUILD_VCBINDIR)/cl.exe
-TOOL_ML=$(XBUILD_VCBINDIR)/ml.exe
+ifeq ($(BUILDARCH),x64)
+    TOOL_ML=$(XBUILD_VCBINDIR)/ml64.exe
+else
+    TOOL_ML=$(XBUILD_VCBINDIR)/ml.exe
+endif
 TOOL_LIB=$(XBUILD_VCBINDIR)/lib.exe
 TOOL_LINK=$(XBUILD_VCBINDIR)/link.exe
 ifeq ($(XBUILD_VSVER),140)
@@ -714,9 +718,9 @@ endif
 #               ML Flags            #
 #-----------------------------------#
 ifeq ($(BUILDARCH), x64)
-    BUILD_MLFLAGS = -nologo -Cx
+    BUILD_MLFLAGS = -nologo -Cx -D_M_X64 -DX64
 else ifeq ($(BUILDARCH), x86)
-    BUILD_MLFLAGS = -nologo -Cx -coff
+    BUILD_MLFLAGS = -nologo -Cx -coff -D_M_X86 -DX86
 endif
 
 ifeq ($(BUILDTYPE),debug)
