@@ -193,19 +193,19 @@ xwsGetVisualStudioToolsDir(){
     if [ $1. == vs2015. ]; then
         echo $2/VC
     elif [ $1. == vs2017. ]; then
-        toolsets=`ls "$2/VC/Tools/MSVC" | sort -r`
+        toolsets=`ls "$2/VC/Tools/MSVC" | sort -r | sed 's/\/*$//g'`
         arrtoolsets=($toolsets)
         if [ ${arrtoolsets[0]}. != . ]; then
             dir="$2/VC/Tools/MSVC/${arrtoolsets[0]}"
         fi
     elif [ $1. == vs2019. ]; then
-        toolsets=`ls "$2/VC/Tools/MSVC" | sort -r`
+        toolsets=`ls "$2/VC/Tools/MSVC" | sort -r | sed 's/\/*$//g'`
         arrtoolsets=($toolsets)
         if [ ${arrtoolsets[0]}. != . ]; then
             dir="$2/VC/Tools/MSVC/${arrtoolsets[0]}"
         fi
     else
-        toolsets=`ls "$2/VC/Tools/MSVC" | sort -r`
+        toolsets=`ls "$2/VC/Tools/MSVC" | sort -r | sed 's/\/*$//g'`
         arrtoolsets=($toolsets)
         if [ ${arrtoolsets[0]}. != . ]; then
             dir="$2/VC/Tools/MSVC/${arrtoolsets[0]}"
@@ -423,6 +423,7 @@ else
     echo "  - ToolsX86: $XVS2015TOOLSBIN32DIR"
     echo "  - ToolsX64: $XVS2015TOOLSBIN64DIR"
     export XVSVER="140"
+    export XVCTOOLSETVER="140"
     export XVSDIR="$XVS2015DIR"
     export XVSTOOLSDIR="$XVS2015TOOLSDIR"
     export XVSTOOLSBIN32DIR="$XVS2015TOOLSBIN32DIR"
@@ -448,6 +449,7 @@ else
     echo "  - ToolsX64:  $XVS2017TOOLSBIN64DIR"
     echo "  - ToolsLlvm: $XVSLLVM2017DIR"
     export XVSVER="150"
+    export XVCTOOLSETVER="141"
     export XVSDIR="$XVS2017DIR"
     export XVSTOOLSDIR="$XVS2017TOOLSDIR"
     export XVSTOOLSBIN32DIR="$XVS2017TOOLSBIN32DIR"
@@ -474,6 +476,7 @@ else
     echo "  - ToolsX64:  $XVS2019TOOLSBIN64DIR"
     echo "  - ToolsLlvm: $XVSLLVM2019DIR"
     export XVSVER="160"
+    export XVCTOOLSETVER="142"
     export XVSDIR="$XVS2019DIR"
     export XVSTOOLSDIR="$XVS2019TOOLSDIR"
     export XVSTOOLSBIN32DIR="$XVS2019TOOLSBIN32DIR"
@@ -482,10 +485,11 @@ else
 fi
 
 echo "[Default Visual Studio]"
-echo "  - Root:      $XVSDIR"
-echo "  - ToolsX86:  $XVSTOOLS32DIR"
-echo "  - ToolsX64:  $XVSTOOLS64DIR"
-echo "  - ToolsLlvm: $XVSLLVMDIR"
+echo "  - Root:       $XVSDIR"
+echo "  - ToolsetVer: $XVCTOOLSETVER"
+echo "  - ToolsX86:   $XVSTOOLSBIN32DIR"
+echo "  - ToolsX64:   $XVSTOOLSBIN64DIR"
+echo "  - ToolsLlvm:  $XVSLLVMDIR"
 
 export XSDKVER=`echo \`xwsGetNewestWinSdkVersion\``
 if [ $XSDKVER. == . ]; then

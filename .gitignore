@@ -1,5 +1,7 @@
 # Exclude everything
 /*
+/xws/**/*.cod
+/xws/**/output/
 !.gitignore
 !.gitattributes
 !README.md
