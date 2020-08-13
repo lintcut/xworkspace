@@ -1,1 +1,0 @@
-$(error Android build environment is not ready yet)

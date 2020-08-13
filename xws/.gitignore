@@ -1,3 +1,7 @@
+# XWS Local settings
+/makefiles/xmake.local.settings.mak
+/certs/
+
 # Build output directories
 build.*/
 output/
@@ -53,3 +57,5 @@ xcuserdata/
 *.vc.db
 *.vc.opendb
 *.aps
+*.cod
+*.nativecodeanalysis.xml

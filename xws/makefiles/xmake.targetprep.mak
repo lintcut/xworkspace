@@ -38,7 +38,7 @@ ifeq ($(TARGETSOURCES),)
     SEARCH_DEPTH=10
 	# Prepare Source Dirs List
     TARGETSRCDIRS:=. $(foreach d, $(TARGETSRCDIRS), $(shell find $(d) -maxdepth $(SEARCH_DEPTH) -type d | sed 's/^\.\///g' | grep -v '^\..*' | grep -v '^output\/*'))
-    $(info Searching directories $(TARGETSRCDIRS))
+    #$(info Searching directories $(TARGETSRCDIRS))
     TARGETSOURCES = $(foreach dir, $(TARGETSRCDIRS), $(foreach pattern, $(SEARCH_TYPES), $(wildcard $(dir)/*.$(pattern))))
 endif
 
@@ -69,7 +69,7 @@ TARGET_DEF:=$(filter %.def, $(TARGETSOURCES))
 ifneq ($(TARGET_DEF),)
     TARGETSOURCES := $(filter-out $(TARGET_DEF),$(TARGETSOURCES))
     ifeq ($(TARGETTYPE),dll)
-        TARGET_LFLAGS += -DEF:$(TARGET_DEF)
+        BUILD_LFLAGS += -DEF:$(TARGET_DEF)
     endif
 endif
 
@@ -78,24 +78,21 @@ ifeq ($(TARGETSOURCES),)
 endif
 TARGET_SRCS:=$(TARGETSOURCES)
 
+# Generate objs file list
+BUILD_OBJS = $(foreach f, $(TARGET_SRCS), $(addsuffix .o,$(basename $f)))
+
 # Check precompiled header file
 ifneq ($(TARGET_PCH),)
     PCH_FILE=$(wildcard $(TARGET_PCH))
     ifeq ($(PCH_FILE),)
         $(error Cannot find precompiled header file "$(TARGET_PCH)")
 	endif
+    BUILD_LFLAGS += $(TARGET_PCHBASENAME).o
+    BUILD_SLFLAGS += $(TARGET_PCHBASENAME).o
 endif
-
-# Make sure VPATH include intermediate dir so we can find IDL generated _i.c/_p.c files
-#VPATH := $(BUILD_INTDIR)
-
-# Generate objs file list
-#BUILD_OBJS = $(foreach f, $(SOURCES), $(addsuffix .o,$(basename $(notdir $f))))   		<-- This line remove dir, but we want to keep dir in intermediate folder
-BUILD_OBJS = $(foreach f, $(TARGET_SRCS), $(addsuffix .o,$(basename $f)))
 
 # Generate res file list
 ifneq ($(TARGET_RCS),)
-    #BUILD_RES = $(foreach f, $(RESOURCES), $(addsuffix .res,$(basename $(notdir $f))))	<-- This line remove dir, but we want to keep dir in intermediate folder
     BUILD_RES = $(foreach f, $(TARGET_RCS), $(addsuffix .res,$(basename $f)))
 endif
 
@@ -128,7 +125,9 @@ endif
 ifneq ($(BUILD_RES),)
     ALLTARGETS += $(BUILD_RES)
     BUILD_LFLAGS += $(BUILD_RES)
+    BUILD_SLFLAGS += $(BUILD_RES)
 endif
 
 ALLTARGETS += $(BUILD_OBJS)
 BUILD_LFLAGS += $(BUILD_OBJS)
+BUILD_SLFLAGS += $(BUILD_OBJS)

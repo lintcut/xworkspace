@@ -136,46 +136,20 @@ TARGET_CFLAGS_ANALYZE=
 ############################################################
 # Override Linker Options (Optional)
 ############################################################
-#    - Enabe incremental linking
-TARGET_LFLAGS_INCREMENTAL=
-#    - Ignore all default libraries
-TARGET_LFLAGS_IGNOREDEFULE=
+#    - Ignore all default libraries: true/false
+TARGET_LFLAGS_IGNOREDEFULT=
 #    - Delay loaded DLLs
 TARGET_LFLAGS_DELAYLOAD_DLLS=
-#    - Generate menifest
-TARGET_LFLAGS_MENIFEST=
-#    - Enable User Account Control
-TARGET_LFLAGS_UAC=
-#    - UAC Execution Level (asInvoker, highestAvailable, requireAdministrator)
-TARGET_LFLAGS_UAC_LEVEL=
-#    - UAC Bypass UI Protection
-TARGET_LFLAGS_UAC_UIP=
-#    - Generate debug information
-TARGET_LFLAGS_DBGINFO=
-#    - Generate program database file
-TARGET_LFLAGS_PDBFILE=
-#    - Generate map file
-TARGET_LFLAGS_MAPFILE=
-#    - Heap reserve size
-TARGET_LFLAGS_HEAPRESERVE_SIZE=
-#    - Heap commit size
-TARGET_LFLAGS_HEAPCOMMIT_SIZE=
-#    - Stack reserve size
-TARGET_LFLAGS_STACKRESERVE_SIZE=
-#    - Stack commit size
-TARGET_LFLAGS_STACKCOMMIT_SIZE=
 #    - Function order file
 TARGET_LFLAGS_FUNCTION_ORDER_FILE=
-#    - Link Time Code Generation
-TARGET_LFLAGS_LTCG=
+#    - Link Time Code Generation: true/false
+TARGET_LFLAGS_FASTLTCG=
 #    - Entry Point
 TARGET_LFLAGS_ENTRYPOINT=
-#    - Set checksum
+#    - Set checksum: true/false
 TARGET_LFLAGS_SETCHECKSUM=
-#    - Randomize base address
-TARGET_LFLAGS_DYNAMICBASE=
-#    - Data Execution Prevention
-TARGET_LFLAGS_DEP=
+#    - Profile
+TARGET_LFLAGS_PROFILE=
 
 # DON NOT CHANGE THIS LINE
 include $(XWSROOT)/xws/makefiles/xmake.mak

@@ -26,9 +26,9 @@ include $(XWSROOT)/xws/makefiles/xmake.targetprep.mak
 		fi \
 	fi
 	@if [ "$(VERBOSE)" = "yes" ]; then \
-		echo '"$(TOOL_ML)" $(BUILD_MLFLAGS) -Fo $(BUILD_INTDIR)/$@ -c $<' ; \
+		echo '"$(TOOL_ML)" $(BUILD_MLFLAGS) -Fo "$(BUILD_INTDIR)/$@" -c $<' ; \
 	fi
-	@"$(TOOL_ML)" $(BUILD_MLFLAGS) -Fo $(BUILD_INTDIR)/$@ -c $< || exit 1
+	@"$(TOOL_ML)" $(BUILD_MLFLAGS) -Fo "$(BUILD_INTDIR)/$@" -c $< || exit 1
 
 %.o: %.asm
 	@if [ -z '$(patsubst %/,%,$(dir $<))' ]; then \
@@ -41,9 +41,9 @@ include $(XWSROOT)/xws/makefiles/xmake.targetprep.mak
 		fi \
 	fi
 	@if [ "$(VERBOSE)" = "yes" ] ; then \
-		echo '"$(TOOL_ML)" $(BUILD_MLFLAGS) -Fo $(BUILD_INTDIR)/$@ -c $<' ; \
+		echo '"$(TOOL_ML)" $(BUILD_MLFLAGS) -Fo "$(BUILD_INTDIR)/$@" -c $<' ; \
 	fi
-	@"$(TOOL_ML)" $(BUILD_MLFLAGS) -Fo $(BUILD_INTDIR)/$@ -c $< || exit 1
+	@"$(TOOL_ML)" $(BUILD_MLFLAGS) -Fo "$(BUILD_INTDIR)/$@" -c $< || exit 1
 
 # Rule for building C files
 %.o: %.c
@@ -57,9 +57,9 @@ include $(XWSROOT)/xws/makefiles/xmake.targetprep.mak
 		fi \
 	fi
 	@if [ "$(VERBOSE)" = "yes" ] ; then \
-		echo '"$(TOOL_CC)" $(BUILD_CFLAGS) -c $< -Fo $(BUILD_INTDIR)/$@' ; \
+		echo '"$(TOOL_CC)" $(BUILD_CFLAGS) -c $< -Fo"$(BUILD_INTDIR)/$@"' ; \
 	fi
-	@"$(TOOL_CC)" $(BUILD_CFLAGS) -c $< -Fo $(BUILD_INTDIR)/$@ || exit 1
+	@"$(TOOL_CC)" $(BUILD_CFLAGS) -c $< -Fo"$(BUILD_INTDIR)/$@" || exit 1
 
 
 # Rule for building C++ files
@@ -80,15 +80,22 @@ include $(XWSROOT)/xws/makefiles/xmake.targetprep.mak
 
 # Rule for Precompiled Header File
 $(TARGETNAME).pch:
-	@echo "> Building precompiled header file ..."
 	@if [ ! -d $(BUILD_INTDIR) ] ; then \
 		mkdir -p $(BUILD_INTDIR) ; \
 	fi
-	@echo '#include "$(TARGET_PCHNAME)"' > $(BUILD_INTDIR)/$(TARGET_PCHBASENAME).cpp
-	@if [ "$(VERBOSE)" = "yes" ] ; then \
-		echo '"$(TOOL_CXX)" $(BUILD_CXXFLAGS) $(CREATE_PCHFLAG) -c "$(BUILD_INTDIR)/$(TARGET_PCHBASENAME).cpp" -Fo"$(BUILD_INTDIR)/$(TARGET_PCHBASENAME).o"' ; \
+	@if [ "$(TARGETMODE)" = "kernel" ] ; then \
+		echo '#include "$(TARGET_PCHNAME)"' > $(BUILD_INTDIR)/$(TARGET_PCHBASENAME).c ; \
+		if [ "$(VERBOSE)" = "yes" ] ; then \
+			echo '"$(TOOL_CC)" $(BUILD_CXXFLAGS) $(CREATE_PCHFLAG) -c "$(BUILD_INTDIR)/$(TARGET_PCHBASENAME).c" -Fo"$(BUILD_INTDIR)/$(TARGET_PCHBASENAME).o"' ; \
+		fi ; \
+		"$(TOOL_CC)" $(BUILD_CXXFLAGS) $(CREATE_PCHFLAG) -c "$(BUILD_INTDIR)/$(TARGET_PCHBASENAME).c" -Fo"$(BUILD_INTDIR)/$(TARGET_PCHBASENAME).o" || exit 1 ; \
+	else \
+		echo '#include "$(TARGET_PCHNAME)"' > $(BUILD_INTDIR)/$(TARGET_PCHBASENAME).cpp ; \
+		if [ "$(VERBOSE)" = "yes" ] ; then \
+			echo '"$(TOOL_CXX)" $(BUILD_CXXFLAGS) $(CREATE_PCHFLAG) -c "$(BUILD_INTDIR)/$(TARGET_PCHBASENAME).cpp" -Fo"$(BUILD_INTDIR)/$(TARGET_PCHBASENAME).o"' ; \
+		fi ; \
+		"$(TOOL_CXX)" $(BUILD_CXXFLAGS) $(CREATE_PCHFLAG) -c "$(BUILD_INTDIR)/$(TARGET_PCHBASENAME).cpp" -Fo"$(BUILD_INTDIR)/$(TARGET_PCHBASENAME).o" || exit 1 ; \
 	fi
-	@"$(TOOL_CXX)" $(BUILD_CXXFLAGS) $(CREATE_PCHFLAG) -c "$(BUILD_INTDIR)/$(TARGET_PCHBASENAME).cpp" -Fo"$(BUILD_INTDIR)/$(TARGET_PCHBASENAME).o" || exit 1
 
 # Rule for building the resources
 %.res: %.rc
@@ -123,13 +130,48 @@ $(TARGETNAME).pch:
 	fi
 	@"$(TOOL_MIDL)" $(BUILD_MIDLFLAGS) /out $(BUILD_INTDIR) $< || exit 1
 
+# Rule to build final target
+$(TARGETNAME)$(TARGETEXT): $(ALLTARGETS)
+	@echo "> Linking ..."
+	@if [ ! -d $(BUILD_OUTDIR) ] ; then \
+		mkdir -p $(BUILD_OUTDIR) ; \
+	fi
+	@if [ "$(TARGETTYPE)" = "lib" ] || [ "$(TARGETTYPE)" = "klib" ] ; then \
+		if [ "$(VERBOSE)" = "yes" ] ; then \
+			echo '"$(TOOL_LIB)" $(BUILD_SLFLAGS) -OUT:"$(BUILD_INTDIR)/$(TARGETNAME)$(TARGETEXT)"' ; \
+		fi ; \
+		"$(TOOL_LIB)" $(BUILD_SLFLAGS) -OUT:"$(BUILD_INTDIR)/$(TARGETNAME)$(TARGETEXT)" ; \
+		echo "> Copying files ..." ; \
+		cp "$(BUILD_INTDIR)/$(TARGETNAME)$(TARGETEXT)" "$(BUILD_OUTDIR)/$(TARGETNAME)$(TARGETEXT)" ; \
+		echo "     $(BUILD_OUTDIR)/$(TARGETNAME)$(TARGETEXT)" ; \
+	else \
+		if [ "$(VERBOSE)" = "yes" ] ; then \
+			echo '"$(TOOL_LINK)" $(BUILD_LFLAGS) -OUT:"$(BUILD_INTDIR)/$(TARGETNAME)$(TARGETEXT)"' ; \
+		fi ; \
+		"$(TOOL_LINK)" $(BUILD_LFLAGS) -OUT:"$(BUILD_INTDIR)/$(TARGETNAME)$(TARGETEXT)" ; \
+		if [ -n '$(BUILDSIGNARGS)' ]; then \
+		    echo '> Signing output ...' ; \
+			if [ "$(VERBOSE)" = "yes" ] ; then \
+		    	echo '"$(TOOL_SIGNTOOL)" $(BUILDSIGNARGS) "$(BUILD_INTDIR)/$(TARGETNAME)$(TARGETEXT)"' ; \
+			fi ; \
+			"$(TOOL_SIGNTOOL)" $(BUILDSIGNARGS) "$(BUILD_INTDIR)/$(TARGETNAME)$(TARGETEXT)"; \
+		fi ; \
+		echo "> Copying files ..." ; \
+		cp "$(BUILD_INTDIR)/$(TARGETNAME)$(TARGETEXT)" "$(BUILD_OUTDIR)/$(TARGETNAME)$(TARGETEXT)" ; \
+		echo "     $(BUILD_OUTDIR)/$(TARGETNAME)$(TARGETEXT)" ; \
+		cp "$(BUILD_INTDIR)/$(TARGETNAME).pdb" "$(BUILD_OUTDIR)/$(TARGETNAME).pdb" ; \
+		echo "     $(BUILD_OUTDIR)/$(TARGETNAME).pdb" ; \
+	fi
+	@if [ "$(TARGETTYPE)" = "dll" ] ; then \
+		cp "$(BUILD_INTDIR)/$(TARGETNAME).lib" "$(BUILD_OUTDIR)/$(TARGETNAME).lib" ; \
+		echo "     $(BUILD_OUTDIR)/$(TARGETNAME).lib" ; \
+	fi
 
 #-----------------------------------#
 #		  FINAL MAKE TARGETS		#
 #-----------------------------------#
 
 .PHONY: buildenv
-.PHONY: buildpch
 
 .PHONY: buildall
 .PHONY: buildclean
@@ -137,6 +179,10 @@ $(TARGETNAME).pch:
 buildenv:
 	@echo " "
 	@echo "----------------- Build Environment Check -----------------"
+	@echo "> Build Args <"
+	@echo "  BUILDTYPE: $(BUILDTYPE)"
+	@echo "  BUILDARCH: $(BUILDARCH)"
+	@echo "  BUILDSIGNARGS: $(BUILDSIGNARGS)"
 	@echo "> Compiler <"
 	@echo "  Version: Visual Studio $(XBUILD_VSVER)"
 	@echo "  ToolsetVer: vc$(XBUILD_VCTOOLSETVER)"
@@ -187,12 +233,6 @@ buildenv:
 	@echo "  All Targets:"
 	@for f in $(ALLTARGETS) ; do echo "    $$f" ; done
 
-buildpch: $(TARGETNAME).pch
-	@echo "PCH file has been built successfully"
-
-$(TARGETNAME)$(TARGETEXT): $(ALLTARGETS)
-	@echo "$(TARGETNAME)$(TARGETEXT) has been built successfully"
-
 buildcheck:
 	@echo '> Initializing ...'
 	@if [ -z "$(BUILDARCH)" ]; then \
@@ -213,19 +253,17 @@ stageCompiling:
 	@echo "> Compiling ..."
 
 buildall: stageStart buildcheck stageCompiling $(TARGETNAME)$(TARGETEXT)
-	@echo "Build Succeed (Used: $(DURATION) seconds)"
+	@echo "Build Succeed (Used: $(XTIME_DURATION) seconds)"
 
 buildclean:
 	@if [ -z '$(BUILDARCH)' ] || [ -z '$(BUILDTYPE)' ]; then \
 	    echo 'Clean all' ; \
 		echo '  - deleting "output" ...' ; \
 		rm -rf output ; \
-		echo '  - deleting "$(PKGROOT)/output" ...' ; \
-		rm -rf "$(PKGROOT)/output" ; \
 	else \
-	    echo 'Clean $(OUTDIRNAME)' ; \
-		echo '  - deleting "$(INTDIR)" ...' ; \
-		rm -rf "$(INTDIR)" ; \
-		echo '  - deleting "$(OUTDIR)" ...' ; \
-		rm -rf "$(OUTDIR)" ; \
+	    echo 'Clean $(BUILDTYPE)_$(BUILDARCH)' ; \
+		echo '  - deleting "$(BUILD_INTDIR)" ...' ; \
+		rm -rf "$(BUILD_INTDIR)" ; \
+		echo '  - deleting "$(BUILD_OUTDIR)" ...' ; \
+		rm -rf "$(BUILD_OUTDIR)" ; \
 	fi
