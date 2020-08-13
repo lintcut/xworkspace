@@ -1,200 +1,86 @@
 # **XWORKSPACE** #
-A workspace template by Xiang Ye
+A workspace for Windows developer.
 
-## Table of Content
+## Why ##
 
-- [1. Introduction](#1-introduction)
-    - [1.1 Background](#11-background)
-    - [1.2 Purpose](#12-purpose)
-    - [1.3 History](#13-history)
-- [2. Prerequisites](#2-prerequisites)
-    - [2.1 Git](#21-git)
-    - [2.2 Bash](#22-bash)
-    - [2.3 Tools](#23-tools)
-        - [2.3.1 Common Tools](#231-common-tools)
-            - [2.3.1.1 Python](#2311-python)
-            - [2.3.1.2 Go](#2312-go)
-            - [2.3.1.3 Lua](#2313-lua)
-        - [2.3.2 Build Tools for Windows](#232-build-tools-for-windows)
-            - [Visual Studio](#visual-studio)
-            - [Windows SDK](#windows-sdk)
-            - [Windows WDK](#windows-wdk)
-        - [2.3.3 Build Tools for Mac](#233-build-tools-for-mac)
-            - [Xcode](#xcode)
-        - [2.3.4 Build Tools for Linux](#234-build-tools-for-linux)
-            - [GCC](#gcc)
-            - [Clang](#clang)
-    - [2.4 System Variables](#24-system-variables)
-- [3. Workspace](#3-workspace)
-    - [3.1 Layout](#31-layout)
-    - [3.2 Init](#32-init)
-- [4. Third-Party](#4-thrid-party)
-    - [4.1 Boost](#41-boost)
-    - [4.2 OpenSSL](#42-openssl)
-    - [4.3 Zlib](#43-zlib)
-- [5. Development](#5-development)
-    - [5.1 Project](#51-project)
-        - [5.1.1 Common Settings](#511-common-settings)
-        - [5.1.2 Visual Studio Project](#512-visual-studio-project)
-        - [5.1.3 Xcode Project](#513-xcode-project)
-        - [5.1.4 CMake Project](#514-cmake-project)
-    - [5.2 Unit Test](#52-unit-test)
-        - [5.2.1 Framework](#521-framework)
-        - [5.2.2 Fixture](#522-fixture)
-        - [5.2.3 Auto Run](#523-auto-run)
-    - [5.3 Snippets](#53-snippets)
-- [6. Deploy and Release](#6-deploy-and-release)
-- [7. Misc](#7-misc)
-    - [7.1 Coding Style](#71-coding-style)
+On Windows, it is not easy to manage projects, especially if developers want to have a development environment that has unified settings and is easy to use and expand. I experienced a lot of difficulties in my development life which makes me try to find an easy way to set up a unified development environment and comes to this project - **`xworkspace`**.
 
-# 1. Introduction
+## What xworkspace does ##
 
-## 1.1 Background
+**`xworkspace`** is a development environment for Windows developers. It has the following features:
 
-It is always not easy to set up development environment from scratch. And it takes a lot of time to maintain development environment and workspace cross multiple devices and operation systems. So it is worthy to find a way to make it easier.
+- Integrate with git-bash.
+- Use GNU make to build all projects.
+- Provides scripts to build several popular 3rd party libraries.
+- Easy to use.
+- Easy to expand.
+- Consistent on different dev-machines.
+- Green install/uninstall.
 
-## 1.2 Purpose
+### Support Projects Type List ###
 
-The purpose of XWORKSPACE is to allow user set up and maintain a consistent development environment cross multiple devices and operation systems.
+- [x] Win32 Console Application
+- [x] Win32 GUI Application
+- [x] Win32 DLL
+- [x] ATL/MFC
+- [x] Win32 Library
+- [x] Windows Kernel Library
+- [x] Windows Driver
 
-- Easy to setup
-- Easy to update
-- Consistent
-- Automatic
+### Support Toolsets, SDKs, WDKs ###
 
-## 1.3 History
+- Visual Studio 2015
+- Visual Studio 2017
+- Visual Studio 2019
+- Windows Kits 10
 
-N/A
+### Customization ###
 
-# 2. Prerequisites
+Currently **`xworkspace`** doesn't support other project types like java, universal app, dot Net, or other compilers like llvm --- it just provides a fundamental framework. 
 
-## 2.1 Git
+The good news is, because of powerful **make**, it is not very hard to customize and expand this framework. And it is not very hard to port it to other platforms (Linux/Mac).
 
-Git is required source control software. User should download and install git before initialize XWORKSPACE.
+## Quick Start ##
 
-Git should be downloaded from official site [DOWNLOADS](https://git-scm.com/downloads)
+It is really simple to use **`xworkspace`**.
 
-**On Windows**
+### Step 1: Make sure GIT and GNU make are installed ###
 
-- Git for Windows doesn't contain GNU Make, download it from [HERE](/workspace.settings/data/make-x64.zip) and put it to "C:\Program Files\Git\usr\bin\make.exe"
+The **`xworkspace`** rely on git-bash and GNU make, so first need to make sure these two are installed.
 
-## 2.2 Bash
+- Download and install Git from [here](https://git-scm.com/download)
+- Download GNU make from [here](http://ftp.gnu.org/gnu/make/) and copy **`make.exe`** to `"C:\Program Files\Git\usr\bin"` (where Git is installed)
 
-For Mac/Linux, system bash is good enough.
+### Step 2: Clone this repo to your local ###
 
-For Windows, use the the bash shipped with Git.
+There are two options:
 
-See detail instructions [**HERE**](/workspace.settings/docs/BASH.md) to config bash properly.
+- If you have no plan to customize or expand **`xworkspace`**, clone it directly.
+- If you plan to customize or expand **`xworkspace`**, fork it first.
 
-## 2.3 Tools
+After clone this repo (for example, to location `"C:\xworkspace"`), add following lines to bash config file `"~/.bashrc" ("C:\Users\{CurrentUser}\.bashrc")`:
 
-### 2.3.1 Common Tools
+```bash
+cd /c/xworkspace/xws/settings
+source bashrc_xws.sh
+cd $XWSROOT
+```
 
-Common tools are tools used cross platform.
+### Step 3: Ready To Go ###
 
-#### 2.3.1.1 Python
+Now you can create your project.
 
-Python is required. Currently XWORKSPACE use python 2.7.
+- Start git-bash (**`xworkspace`** will ask you to create a developer certificate if there is no one. Just simply run script `"$XWSROOT/xws/bin/xws-gen-devcert.sh"` to create new dev-cert.)
+- Create a new folder for your project (e.g. `"mkdir $XWSROOT/src/MyFirstProject"`)
+- Add source file and write code
+- Copy `"$XWSROOT/xws/makefiles/Makefile"` to your project folder `"$XWSROOT/src/MyFirstProject/Makefile"` and set correct `"TARGETNAME"` and `"TARGETTYPE"` (These are described in **Makefile**).
+    - **console**: Win32 console application
+    - **gui**: Win32 GUI application
+    - **dll**: Win32 DLL
+    - **lib**: Win32 Library
+    - **klib**: Windows Kernel Library
+    - **kdrv**: Windows Driver
+- Go to your project folder (`"cd $XWSROOT/src/MyFirstProject"`) and run one of following commands: `makex86dbg`, `makex86rel`, `makex64dbg`, `makex64rel` (Or command with verbose `makex86dbgv`, `makex86relv`, `makex64dbgv`, `makex64relv`).
 
-See detail instructions [**HERE**](/workspace.settings/docs/PYTHON.md) to download, setup and config python properly.
-
-#### 2.3.1.2 Go
-
-*Optional*
-
-#### 2.3.1.3 Lua
-
-*Optional*
-
-### 2.3.2 Build Tools for Windows
-
-#### Visual Studio
-
-Use Visual Studio on Windows. [DOWNLAOD](https://www.visualstudio.com/downloads/)
-
-#### Windows SDK
-
-- [Windows SDK](https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk)
-- [Windows SDK - Archived](https://developer.microsoft.com/en-us/windows/downloads/sdk-archive)
-
-#### Windows WDK
-
-- [Windows WDK](https://docs.microsoft.com/en-us/windows-hardware/drivers/download-the-wdk)
-- [Windows WDK - Archived](https://docs.microsoft.com/en-us/windows-hardware/drivers/other-wdk-downloads)
-
-### 2.3.3 Build Tools for Mac
-
-#### Xcode
-
-### 2.3.4 Build Tools for Linux
-
-#### GCC
-
-#### Clang
-
-## 2.4 System Variables
-
-### 2.4.1 XWSROOT
-
-**Windows**
-
-Set System Variable "`XWSROOT=<path/to/XWORKSPACE>`"
-
-**Other Platform**
-
-See section ["3. Global Variables"](/workspace.settings/docs/BASH.md#31-xwsroot)
-
-# 3. Workspace
-
-## 3.1 Layout
-
-### 3.1.1 Overveiw
-
-### 3.1.2 workspace.seetings
-
-### 3.1.3 src
-
-## 3.2 Init
-
-## 3.3 Cleanup
-
-# 4. Third-Party
-
-## 4.1 Boost
-
-## 4.2 OpenSSL
-
-## 4.3 Zlib
-
-# 5. Development
-
-## 5.1 Project
-
-### 5.1.1 Common Settings
-
-#### Project Dirs
-
-#### Project Global Virables
-
-#### Project Include Paths
-
-#### Project Lib Paths
-
-### 5.1.2 Visual Studio Project
-
-### 5.1.3 Xcode Project
-
-### 5.1.4 CMake Project
-
-## 5.2 Unit Test
-
-### 5.2.1 Framework
-
-### 5.2.2 Fixture
-
-### 5.2.3 Auto-run
-
-# 6. Deploy and Release
-
-# 7. Misc
+## Reference ##
 

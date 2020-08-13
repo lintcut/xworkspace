@@ -74,10 +74,13 @@ alias cdw='cd $XWSROOT'
 # build
 alias makex86rel='make BUILDARCH=x86 BUILDTYPE=release'
 alias makex86dbg='make BUILDARCH=x86 BUILDTYPE=debug'
-alias makex86nop='make BUILDARCH=x86 BUILDTYPE=noopt'
 alias makex64rel='make BUILDARCH=x64 BUILDTYPE=release'
 alias makex64dbg='make BUILDARCH=x64 BUILDTYPE=debug'
-alias makex64nop='make BUILDARCH=x64 BUILDTYPE=noopt'
+
+alias makex86relv='make BUILDARCH=x86 BUILDTYPE=release VERBOSE=yes'
+alias makex86dbgv='make BUILDARCH=x86 BUILDTYPE=debug VERBOSE=yes'
+alias makex64relv='make BUILDARCH=x64 BUILDTYPE=release VERBOSE=yes'
+alias makex64dbgv='make BUILDARCH=x64 BUILDTYPE=debug VERBOSE=yes'
 
 # This fix git-bash ssh connection problem
 alias xssh='ssh -o IdentitiesOnly=yes'
