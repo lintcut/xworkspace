@@ -1,3 +1,7 @@
+# XWS Local settings
+/makefiles/xmake.local.settings.mak
+/certs/
+
 # Build output directories
 build.*/
 output/

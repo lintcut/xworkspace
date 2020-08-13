@@ -41,6 +41,28 @@ ifeq ($(BUILDTYPE),)
     $(error xmake.common: BUILDTYPE is not defined (debug/release))
 endif
 
+# There is a local settings file
+ifneq (,$(wildcard $(XWSROOT)/xws/makefiles/xmake.local.settings.mak))
+    $(info xmake.local.settings.mak is included)
+    include $(XWSROOT)/xws/makefiles/xmake.local.settings.mak
+endif
+
+ifeq ($(BUILDCERT),)
+    BUILDCERT=$(XBUILD_DEVCERT)
+    BUILDCERTPSWD=$(XBUILD_DEVCERTPSWD)
+    BUILDCERTTIMEURL=$(XBUILD_DEVCERTTTIMEURL)
+endif
+
+# signtool.exe sign -f <cert file> -p <password> -t <time server url>
+BUILDSIGNARGS=
+ifneq ($(BUILDCERT),)
+    BUILDSIGNARGS = sign -f "$(BUILDCERT)" -p "$(BUILDCERTPSWD)"
+    ifneq ($(BUILDCERTTIMEURL),)
+        BUILDSIGNARGS += -t $(BUILDCERTTIMEURL)
+    endif
+    BUILDSIGNARGS += -td sha256 -fd sha256 -v
+endif
+
 # Check TARGETTYPE and set BUILDMODE (user/kernel), TARGETEXT and TARGET_SUBSYS
 ifeq ($(TARGETTYPE),gui)
     TARGETEXT=.exe

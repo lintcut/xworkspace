@@ -7,7 +7,7 @@
 #-----------------------------------#
 
 # The name/extension of target
-TARGETNAME=dllxvault
+TARGETNAME=xvault
 
 # The type of target:
 #    console:console application

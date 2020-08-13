@@ -546,3 +546,8 @@ echo "  - x64: $XJRE64DIR"
 ##  Alias
 ##
 
+
+##
+##  Check developer certificate
+##
+test -f "$XWSROOT/xws/certs/devcert.pfx" || echo "WARNING: developer certificate doesn't exist, use $XWSROOT/xws/bin/xws-gen-devcert.sh to create one"
