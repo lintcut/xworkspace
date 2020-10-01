@@ -1,4 +1,5 @@
 # **XWORKSPACE** #
+
 A workspace for Windows developer.
 
 ## Why ##
@@ -36,7 +37,7 @@ On Windows, it is not easy to manage projects, especially if developers want to 
 
 ### Customization ###
 
-Currently **`xworkspace`** doesn't support other project types like java, universal app, dot Net, or other compilers like llvm or gcc --- it just provides a fundamental framework. 
+Currently **`xworkspace`** doesn't support other project types like java, universal app, dot Net, or other compilers like llvm or gcc --- it just provides a fundamental framework.
 
 The good news is, because of powerful **make**, it is not very hard to customize and expand this framework. And it is not very hard to port it to other platforms (Linux/Mac).
 
@@ -76,13 +77,14 @@ Now you can create your project.
 - Create a new folder for your project (e.g. `"mkdir $XWSROOT/src/MyFirstProject"`)
 - Add source file and write code
 - Copy `"$XWSROOT/xws/makefiles/Makefile"` to your project folder `"$XWSROOT/src/MyFirstProject/Makefile"` and set correct `"TARGETNAME"` and `"TARGETTYPE"` (These are described in **Makefile**).
-    - **console**: Win32 console application
-    - **gui**: Win32 GUI application
-    - **dll**: Win32 DLL
-    - **lib**: Win32 Library
-    - **klib**: Windows Kernel Library
-    - **kdrv**: Windows Driver
+  - **console**: Win32 console application
+  - **gui**: Win32 GUI application
+  - **dll**: Win32 DLL
+  - **lib**: Win32 Library
+  - **klib**: Windows Kernel Library
+  - **kdrv**: Windows Driver
 - Go to your project folder (`"cd $XWSROOT/src/MyFirstProject"`) and run one of following commands: `makex86dbg`, `makex86rel`, `makex64dbg`, `makex64rel` (Or command with verbose `makex86dbgv`, `makex86relv`, `makex64dbgv`, `makex64relv`).
 
 ## Reference ##
 
+TBD
